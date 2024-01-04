@@ -6,9 +6,9 @@ OBJS=linked_list.o\
      fake_process.o\
      fake_os.o
 
-HEADERS=linked_list.h  fake_process.h
+HEADERS=linked_list.h  process.h
 
-BINS=fake_process_test sched_sim
+BINS=process_test sched_sim
 
 #disastros_test
 
@@ -20,7 +20,7 @@ all:	$(BINS)
 %.o:	%.c $(HEADERS)
 	$(CC) $(CCOPTS) -c -o $@  $<
 
-fake_process_test:	fake_process_test.c $(OBJS)
+process_test:	process_test.c $(OBJS)
 	$(CC) $(CCOPTS) -o $@ $^
 
 sched_sim:	sched_sim.c $(OBJS)
