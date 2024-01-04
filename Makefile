@@ -3,8 +3,8 @@ CCOPTS=--std=gnu99 -Wall -D_LIST_DEBUG_
 AR=ar
 
 OBJS=linked_list.o\
-     fake_process.o\
-     fake_os.o
+	 process.o\
+     os.o
 
 HEADERS=linked_list.h  process.h
 
