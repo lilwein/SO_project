@@ -26,3 +26,5 @@ typedef struct OS{
 void OS_init(OS* os);
 void OS_simStep(OS* os);
 void OS_destroy(OS* os);
+
+PCB* shortestJobPCB (ListItem* item);
