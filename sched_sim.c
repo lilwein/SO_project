@@ -10,15 +10,15 @@ typedef struct {
 } SchedRRArgs;
 
 void schedRR(OS* os, void* args_){
-	SchedRRArgs* args=(SchedRRArgs*)args_;
+	SchedRRArgs* args = (SchedRRArgs*)args_;
 
 	// look for the first process in ready
 	// if none, return
 	if (! os->ready.first)
 		return;
 
-	PCB* pcb=(PCB*) List_popFront(&os->ready);
-	os->running=pcb;
+	PCB* pcb = (PCB*) List_popFront(&os->ready);
+	os->running = pcb;
 	
 	assert(pcb->events.first);
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
@@ -29,9 +29,10 @@ void schedRR(OS* os, void* args_){
 	// push front in the list of event a CPU event of duration quantum
 	// alter the duration of the old event subtracting quantum
 	if (e->duration>args->quantum) { // divido l'evento per il quanto
-		ProcessEvent* qe=(ProcessEvent*)malloc(sizeof(ProcessEvent));
-		qe->list.prev=qe->list.next=0;
-		qe->type=CPU;
+		ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
+		qe->list.prev = 0;
+		qe->list.next = 0;
+		qe->type = CPU;
 		// split
 		qe->duration = args->quantum; // primo evento, durata = 1 quanto
 		e->duration -= args->quantum; // secondo evento, durata = durata-quanto
