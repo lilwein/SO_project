@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
 #include "os.h"
 
@@ -67,7 +68,7 @@ void OS_createProcess(OS* os, Process* p) {
 
 void OS_simStep(OS* os){
 	
-	printf("************** TIME: %08d **************\n", os->timer);
+	printf("\n************** TIME: %08d **************\n", os->timer);
 
 	//scan process waiting to be started
 	//and create all processes starting now

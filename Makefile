@@ -1,5 +1,5 @@
 CC=gcc
-CCOPTS=--std=gnu99 -Wall -D_LIST_DEBUG_ 
+CCOPTS=--std=gnu99 -Wall -D_LIST_DEBUG_
 AR=ar
 
 OBJS=linked_list.o\
@@ -21,7 +21,7 @@ all:	$(BINS)
 	$(CC) $(CCOPTS) -c -o $@  $<
 
 sched_sim:	sched_sim.c $(OBJS)
-	$(CC) $(CCOPTS) -o $@ $^
+	$(CC) $(CCOPTS) -o $@ $^ -lm
 
 clean:
 	rm -rf *.o *~ $(OBJS) $(BINS)

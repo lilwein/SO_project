@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <math.h>
 #include "process.h"
 
 #define LINE_LENGTH 1024
+
+#define DECAY_COEFF 0.5
 
 int Process_load(Process* p, const char* filename) {
 	
@@ -42,6 +46,8 @@ int Process_load(Process* p, const char* filename) {
 			e->list.next = 0;
 			e->type = CPU;
 			e->duration = duration;
+			e->prediction = -1;
+			e->next_prediction = -1;
 			List_pushBack(&p->events, (ListItem*)e);
 			++num_events;
 			continue;
@@ -54,6 +60,8 @@ int Process_load(Process* p, const char* filename) {
 			e->list.next = 0;
 			e->type = IO;
 			e->duration = duration;
+			e->prediction = -1;
+			e->next_prediction = -1;
 			List_pushBack(&p->events, (ListItem*)e);
 			++num_events;
 			continue;
@@ -68,7 +76,31 @@ int Process_load(Process* p, const char* filename) {
 }
 
 
+void Process_CalculatePrediction(Process* p){
+	
+	ListItem* aux = p->events.first;
+	int quantum_pred;
+	
+	char first_event = 1;
 
+	while(aux){
+		ProcessEvent* e = (ProcessEvent*) aux;
+		assert(e->type == CPU);
+		assert(e->prediction == -1);
+		
+		if(first_event) e->prediction = e->duration;
+		else e->prediction = quantum_pred;
+
+		double qp = e->duration * DECAY_COEFF + e->prediction * (1-DECAY_COEFF);
+		quantum_pred = round(qp);
+		e->next_prediction = quantum_pred;
+
+		first_event = 0;
+		aux = aux->next;
+		if(aux==NULL) break;
+		aux = aux->next;
+	}
+}
 
 
 int Process_save(const Process* p, const char* filename){

@@ -8,6 +8,8 @@ typedef struct {
 	ListItem list;
 	ResourceType type;
 	int duration;
+	int prediction;
+	int next_prediction;
 } ProcessEvent;
 
 // processo
@@ -17,6 +19,8 @@ typedef struct {
 	int arrival_time;
 	ListHead events;
 } Process;
+
+void Process_CalculatePrediction(Process* p);
 
 int Process_load(Process* p, const char* filename);
 
