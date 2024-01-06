@@ -87,6 +87,22 @@ void OS_simStep(OS* os){
 		}
 	}
 
+
+	// call schedule, if defined
+	if (os->schedule_fn && ! os->running){
+		(*os->schedule_fn)(os, os->schedule_args); 
+		// lo scheduler modificherà os->running
+	}
+
+	// if running not defined and ready queue not empty
+	// put the first in ready to run
+	if (! os->running && os->ready.first) {
+		os->running = (PCB*) List_popFront(&os->ready);
+	}
+
+
+
+
 	// scan waiting list, and put in ready all items whose event terminates
 	aux = os->waiting.first;
 	while(aux) {
@@ -129,7 +145,7 @@ void OS_simStep(OS* os){
 		}
 	}
 
-	
+
 
 	// decrement the duration of running
 	// if event over, destroy event and reschedule process
@@ -170,17 +186,7 @@ void OS_simStep(OS* os){
 	}
 
 
-	// call schedule, if defined
-	if (os->schedule_fn && ! os->running){
-		(*os->schedule_fn)(os, os->schedule_args); 
-		// lo scheduler modificherà os->running
-	}
-
-	// if running not defined and ready queue not empty
-	// put the first in ready to run
-	if (! os->running && os->ready.first) {
-		os->running = (PCB*) List_popFront(&os->ready);
-	}
+	
 
 	++os->timer;
 
