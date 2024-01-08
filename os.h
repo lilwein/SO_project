@@ -13,7 +13,7 @@ struct OS;
 typedef void (*ScheduleFn)(struct OS* os, void* args);
 
 typedef struct OS{
-	PCB* running;
+	ListHead running;
 	ListHead ready;
 	ListHead waiting;
 	int timer;
@@ -22,6 +22,10 @@ typedef struct OS{
 
 	ListHead processes;
 } OS;
+
+typedef struct {
+	int core;
+} scheduler_args;
 
 void OS_init(OS* os);
 void OS_simStep(OS* os);

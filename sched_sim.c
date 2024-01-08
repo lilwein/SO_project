@@ -6,12 +6,12 @@
 
 OS os;
 
-typedef struct {
-	int quantum;
-} schedulerSJF_args;
+// typedef struct {
+// 	int core;
+// } scheduler_args;
 
 void schedulerSJF(OS* os, void* args_){
-	//schedulerSJF_args* args = (schedulerSJF_args*)args_;
+	//scheduler_args* args = (scheduler_args*)args_;
 
 	if (! os->ready.first) return;
 
@@ -20,6 +20,8 @@ void schedulerSJF(OS* os, void* args_){
 	pcb = shortestJobPCB(item);
 
 	List_detach( &(os->ready), (ListItem*) pcb);
+
+	//  *** aggiunta pcb a running
 
 	// PCB* pcb = (PCB*) List_popFront(&os->ready);
 	os->running = pcb;
@@ -68,13 +70,20 @@ PCB* shortestJobPCB (ListItem* item){
 
 
 int main(int argc, char** argv) {
+	
+	// *** inserire controlli numero di argomenti
+
+	int core = atoi(argv[1]);
+	
 	OS_init(&os);
-	schedulerSJF_args srr_args;
-	srr_args.quantum = 5;
+	scheduler_args srr_args;
+	srr_args.core = core;
 	os.schedule_args = &srr_args;
 	os.schedule_fn = schedulerSJF;
 	
-	for (int i=1; i<argc; ++i){
+	
+
+	for (int i=2; i<argc; ++i){
 		Process new_process;
 		int num_events = Process_load(&new_process, argv[i]);
 		Process_CalculatePrediction(&new_process);
