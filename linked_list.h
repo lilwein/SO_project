@@ -18,3 +18,6 @@ ListItem* List_detach(ListHead* head, ListItem* item);
 ListItem* List_pushBack(ListHead* head, ListItem* item);
 ListItem* List_pushFront(ListHead* head, ListItem* item);
 ListItem* List_popFront(ListHead* head);
+
+void List_free(ListHead* head);
+ListItem* List_pushBackUnion(ListHead* head, ListItem* item);

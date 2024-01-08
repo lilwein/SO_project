@@ -88,5 +88,13 @@ ListItem* List_pushFront(ListHead* head, ListItem* item) {
 
 ListItem* List_popFront(ListHead* head) {
   	return List_detach(head, head->first);
-}
+};
 
+void List_free(ListHead* head) {
+	for(int i=0; i<head->size; i++) List_popFront(head);
+};
+
+ListItem* List_pushBackUnion(ListHead* head, ListItem* item) {
+	if(List_find(head, item)) return item;
+  	return List_pushBack(head, item);
+}
