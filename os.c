@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+//***
+#include <unistd.h>
 
 #include "os.h"
 
@@ -97,12 +99,21 @@ void OS_simStep(OS* os){
 		}
 	}
 
+	ListHead usedThisTime;
+	List_init(&usedThisTime);
+	
+
 	// numero di core disponibili
 	scheduler_args* args = (scheduler_args*) os->schedule_args;
 	int core = args->core;
 
+	
+
+	
+
 	// ripetere per ogni core disponibile
 	for(int i=0; i<core; i++){
+		if(i>0) printf("#### CORE %d ####\n", i+1);
 
 		// controllo sul numero di processi in running
 		int runningProcess = os->running.size;
@@ -133,11 +144,31 @@ void OS_simStep(OS* os){
 		// 	os->running = (PCB*) List_popFront(&os->ready);
 		// }
 
+		
 
+		// stampa processi in running
+		if (i==0){
+			runningProcess = os->running.size;
+			if(!runningProcess) printf("\tno processes are running");
+			else printf("\t%d processes are running:", runningProcess);
+			aux = os->running.first;
+			while(aux) {
+				PCB* pcb = (PCB*)aux;
+				printf("\t(%d)", pcb->pid);
+				aux = aux->next;
+			}
+			printf("\n");
+			printf("#### CORE %d ####\n", i+1);
+		}
+		
 
 		// scansione della waiting list
 		aux = os->waiting.first;
-		while(aux) {
+		while( aux && ! List_find(&usedThisTime, aux) ) {
+
+			// ***************************
+			List_pushBackUnion(&usedThisTime, aux);
+
 			PCB* pcb = (PCB*)aux;
 			aux = aux->next;
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
@@ -186,19 +217,18 @@ void OS_simStep(OS* os){
 			}
 		}
 
-		// stampa processi in running
-		aux = os->running.first;
-		printf("\t%d processes are running:", runningProcess);
-		if(!runningProcess) printf("\t----");
-		while(aux) {
-			PCB* pcb = (PCB*)aux;
-			printf("\t(%d)", pcb->pid);
-		}
-		printf("\n");
+		runningProcess = os->running.size;
+
+		
 
 		// scansione dei processi in running
 		aux = os->running.first;
-		while(aux) {
+		while( aux && ! List_find(&usedThisTime, aux) ) {
+
+			// ************************
+			List_pushBackUnion(&usedThisTime, aux);
+
+
 			PCB* pcb = (PCB*)aux;
 			aux = aux->next;
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
@@ -251,7 +281,20 @@ void OS_simStep(OS* os){
 
 	}
 
+	List_free(&usedThisTime);
+
+	//while( List_popFront(&usedThisTime) );
+	//for(int i=0; i<usedThisTime.size; i++){
+		//List_popFront(&usedThisTime);
+	// }
+
 	++os->timer;
+
+	//*********
+	// sleep(1);
+	
+	// *****************
+	//free(&usedThisTime);
 
 }
 
