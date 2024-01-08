@@ -21,3 +21,4 @@ ListItem* List_popFront(ListHead* head);
 
 void List_free(ListHead* head);
 ListItem* List_pushBackUnion(ListHead* head, ListItem* item);
+ListItem* List_pushFrontUnion(ListHead* head, ListItem* item);

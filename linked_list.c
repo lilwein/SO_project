@@ -97,4 +97,9 @@ void List_free(ListHead* head) {
 ListItem* List_pushBackUnion(ListHead* head, ListItem* item) {
 	if(List_find(head, item)) return item;
   	return List_pushBack(head, item);
+};
+
+ListItem* List_pushFrontUnion(ListHead* head, ListItem* item) {
+	if(List_find(head, item)) return item;
+  	return List_pushFront(head, item);
 }
