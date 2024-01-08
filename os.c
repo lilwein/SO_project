@@ -143,7 +143,7 @@ void OS_simStep(OS* os){
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
 			printf("\twaiting process: (%d)\n", pcb->pid);
 
-			// controlliamo che il pcb abbia un evento di tipo IO
+			// controlliamo che il pcb abbia l'evento di tipo IO
 			assert(e->type==IO);
 			
 			// è passata un'epoca: decremento della durata rimanente
@@ -153,11 +153,12 @@ void OS_simStep(OS* os){
 			// se l'IO BURST non è terminato, si passa al prossimo processo
 			// se l'IO BURST è terminato,
 			if (e->duration == 0) {
-				printf("\t\tend IO BURST for (%d) process\n", pcb->pid);
+				printf("\t\tend IO BURST for process (%d)\n", pcb->pid);
 				
 				// eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
 				free(e);
+
 				// eliminazione del pcb dalla waiting list
 				List_detach(&os->waiting, (ListItem*)pcb);
 				
@@ -185,44 +186,65 @@ void OS_simStep(OS* os){
 			}
 		}
 
+		// stampa processi in running
+		aux = os->running.first;
+		printf("\t%d processes are running:", runningProcess);
+		if(!runningProcess) printf("\t----");
+		while(aux) {
+			PCB* pcb = (PCB*)aux;
+			printf("\t(%d)", pcb->pid);
+		}
+		printf("\n");
+
 		// scansione dei processi in running
-
-
-		// decrement the duration of running
-		// if event over, destroy event and reschedule process
-		// if last event, destroy running
-		PCB* running = os->running;
-		printf("\trunning pid: %d\n", running?running->pid:-1);
-
-		if (running) {
-			ProcessEvent* e = (ProcessEvent*) running->events.first;
+		aux = os->running.first;
+		while(aux) {
+			PCB* pcb = (PCB*)aux;
+			aux = aux->next;
+			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
+			printf("\trunning pid: (%d)\n", pcb->pid);
+			
+			// controlliamo che il pcb abbia l'evento di tipo CPU
 			assert(e->type==CPU);
+
+			// è passata un'epoca: decremento della durata rimanente
 			e->duration--;
 			printf("\t\tremaining time:%d\n",e->duration);
 
-			if (e->duration==0){ // abbiamo consumato il burst del processo running
-				printf("\t\tend burst\n");
-				List_popFront(&running->events);
-				free(e);
-				if (! running->events.first) {
-					printf("\t\tend process\n");
-					free(running); // kill process
-				}
-				else {
-					e = (ProcessEvent*) running->events.first;
+			// se il CPU BURST non è terminato, si passa al prossimo processo
+			// se il CPU BURST è terminato,
+			if (e->duration == 0) {
+				printf("\t\tend CPU BURST for process (%d)\n", pcb->pid);
 
+				// eliminazione dell'evento dalla coda degli eventi del pcb
+				List_popFront(&pcb->events);
+				free(e);
+
+				// eliminazione del pcb dalla running list
+				List_detach(&os->running, (ListItem*)pcb);
+
+				// eventi finiti: kill process
+				if (! pcb->events.first) {
+					printf("\t\tend process (%d)\n", pcb->pid);
+					free(pcb);
+				}
+				// ci sono ancora eventi di tipo CPU o IO
+				else {
+					e = (ProcessEvent*) pcb->events.first;
+
+					// trasferimento del pcb in ready o waiting list
 					switch (e->type){
 					case CPU:
-						printf("\t\tmove to ready\n");
-						List_pushBack(&os->ready, (ListItem*) running);
+						printf("\t\t(%d) move to ready\n", pcb->pid);
+						List_pushBack(&os->ready, (ListItem*) pcb);
 						break;
 					case IO:
-						printf("\t\tmove to waiting\n");
-						List_pushBack(&os->waiting, (ListItem*) running);
+						printf("\t\t(%d) move to waiting\n", pcb->pid);
+						List_pushBack(&os->waiting, (ListItem*) pcb);
 						break;
 					}
 				}
-				os->running = 0;
+				// os->running = 0;
 			}
 		}
 

@@ -22,9 +22,10 @@ void schedulerSJF(OS* os, void* args_){
 	List_detach( &(os->ready), (ListItem*) pcb);
 
 	//  *** aggiunta pcb a running
+	List_pushBack( &(os->running), (ListItem*) pcb);
 
 	// PCB* pcb = (PCB*) List_popFront(&os->ready);
-	os->running = pcb;
+	
 	
 	assert(pcb->events.first);
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
@@ -96,10 +97,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	printf("num processes in queue %d\n", os.processes.size);
-	while(os.running
-				|| os.ready.first
-				|| os.waiting.first
-				|| os.processes.first){
+	while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) {
 		OS_simStep(&os);
 	}
 }
