@@ -269,8 +269,8 @@ void OS_simStep(OS* os){
 			// 	List_pushBack(&os->ready, aux);
 				
 			// } else
-			// List_pushBack(&(os->usedThisTime), aux);
-			List_insert(&(os->usedThisTime), (&os->usedThisTime)->last, aux);
+			List_pushBack(&(os->usedThisTime), aux);
+			// List_insert(&(os->usedThisTime), (&os->usedThisTime)->last, aux);
 
 			// if(os->timer==2 && i==0){
 			// 	List_detach(&os->ready, aux);
