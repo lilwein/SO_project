@@ -21,8 +21,6 @@ typedef struct OS{
 	void* schedule_args;
 
 	ListHead processes;
-
-	ListHead usedThisTime;
 } OS;
 
 typedef struct {
