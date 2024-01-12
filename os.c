@@ -176,24 +176,19 @@ void OS_simStep(OS* os){
 		aux = os->waiting.first;
 		while( aux && ((PCB*)aux)->usedThis == 0 ) {
 			PCB* pcb = (PCB*)aux;
+			aux = aux->next;
 
 			#ifdef _DEBUG
-				printf("waiting pid (%d)\n", ((PCB*)aux)->pid);
+				printf("in waiting while: pid (%d)\n", pcb->pid);
 			#endif
 
 			pcb->usedThis = 1;
-			
-			if(List_find(&os->ready, aux)){
-				printf("ATTENZIONE: pushback indesiderato in ready\n");
-				List_detach(&os->ready, aux);
-			}
 
 			#ifdef _DEBUG
 				printPidLists(os, 3);
 			#endif
 
 			
-			aux = aux->next;
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
 			printf("\twaiting process: (%d)\n", pcb->pid);
 
@@ -253,26 +248,26 @@ void OS_simStep(OS* os){
 			// if(aux)printf("OS: runnable (%d)? %s\n", ((PCB*)aux)->pid, ((PCB*)aux)->usedThis==0? "si":"no");
 		#endif
 
-		// while( aux && ! List_find(&os->usedThisTime, aux) ) {
-		while( aux && ((PCB*)aux)->usedThis == 0 ) {
+
+		while( aux ) {
 			PCB* pcb = (PCB*)aux;
+			aux = aux->next;
+
+			// ***************
+			if(pcb->usedThis != 0) continue;
 
 			#ifdef _DEBUG
-				printf("running pid (%d)\n", ((PCB*)aux)->pid);
+				printf("in running while: pid (%d)\n", pcb->pid);
 			#endif
 
 			pcb->usedThis = 1;
 
-			if(List_find(&os->ready, aux)){
-				printf("ATTENZIONE: pushback indesiderato in ready\n");
-				List_detach(&os->ready, aux);
-			}
 
 			#ifdef _DEBUG
 				printPidLists(os, 5);
 			#endif
 			
-			aux = aux->next;
+			
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
 			printf("\trunning pid: (%d)\n", pcb->pid);
 			
@@ -317,6 +312,8 @@ void OS_simStep(OS* os){
 					}
 				}
 			}
+			// ***************************
+			break;
 		}
 
 		#ifdef _DEBUG
@@ -331,7 +328,7 @@ void OS_simStep(OS* os){
 
 	++os->timer;
 
-	sleep(1);
+	// sleep(1);
 
 }
 

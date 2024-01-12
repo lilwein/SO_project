@@ -1,5 +1,5 @@
 CC=gcc
-CCOPTS=--std=gnu99 -Wall -D_LIST_DEBUG_ -D_DEBUG
+CCOPTS=--std=gnu99 -Wall -D_LIST_DEBUG_ #-D_DEBUG -D_DEBUG_SCHEDULER
 AR=ar
 
 OBJS=linked_list.o\

@@ -14,13 +14,17 @@ void schedulerSJF(OS* os, void* args_){
 	//scheduler_args* args = (scheduler_args*)args_;
 
 	if (! os->ready.first) {
-		printf("SCHEDULER: no pcb in ready\n");
+		#ifdef _DEBUG_SCHEDULER
+			printf("SCHEDULER: DO NOTHING (no pcb in ready)\n");
+		#endif
 		return;
 	}
 
 	ListItem* item = os->ready.first;
-	PCB* p = (PCB*) item;
-	printf("SCHEDULER: ready.first: (%d)\n", p->pid);
+	
+	#ifdef _DEBUG_SCHEDULER
+		printf("SCHEDULER: PUT ready.first pid (%d) in running\n", (PCB*) item->pid);
+	#endif
 
 	PCB* pcb = (PCB*) malloc(sizeof(PCB));
 	pcb = shortestJobPCB(item);
@@ -35,7 +39,7 @@ void schedulerSJF(OS* os, void* args_){
 	
 	assert(pcb->events.first);
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
-	assert(e->type==CPU && "AAA");
+	assert(e->type==CPU);
 
 
 	if ( e->duration > e->prediction ) { 
@@ -63,7 +67,7 @@ PCB* shortestJobPCB (ListItem* item){
 
 	PCB* pcb = (PCB*) item;
 	ProcessEvent* e = (ProcessEvent*) pcb->events.first;
-	assert(e->type==CPU && "BBB");
+	assert(e->type==CPU);
 
 	PCB* next_pcb = shortestJobPCB(item->next);
 	if(!next_pcb) return pcb;
