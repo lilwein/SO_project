@@ -20,5 +20,6 @@ ListItem* List_pushFront(ListHead* head, ListItem* item);
 ListItem* List_popFront(ListHead* head);
 
 void List_free(ListHead* head);
+void List_free_aux(ListHead* head, ListItem* item);
 ListItem* List_pushBackUnion(ListHead* head, ListItem* item);
 ListItem* List_pushFrontUnion(ListHead* head, ListItem* item);

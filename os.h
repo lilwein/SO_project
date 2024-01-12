@@ -7,6 +7,8 @@ typedef struct {
 	ListItem list;
 	int pid;
 	ListHead events;
+
+	int usedThis;
 } PCB;
 
 struct OS;
@@ -37,3 +39,7 @@ void OS_destroy(OS* os);
 PCB* shortestJobPCB (ListItem* item);
 
 void printPidList(ListHead* head, char* name);
+
+void setZeroUsed(ListHead* head);
+void printUsed(OS* os, char* name);
+void printUsedAUX(ListHead* head);
