@@ -14,13 +14,13 @@ void schedulerSJF(OS* os, void* args_){
 	//scheduler_args* args = (scheduler_args*)args_;
 
 	if (! os->ready.first) {
-		printf("AA. Scheduler: ! os->ready.first\n");
+		printf("SCHEDULER: no pcb in ready\n");
 		return;
 	}
 
 	ListItem* item = os->ready.first;
 	PCB* p = (PCB*) item;
-	printf("BB. Scheduler: ready.first: %d\n", p->pid);
+	printf("SCHEDULER: ready.first: (%d)\n", p->pid);
 
 	PCB* pcb = (PCB*) malloc(sizeof(PCB));
 	pcb = shortestJobPCB(item);
