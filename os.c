@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-//***
 #include <unistd.h>
 
 #include "os.h"
@@ -15,8 +14,6 @@ void OS_init(OS* os) {
 	List_init(&os->ready);
 	List_init(&os->waiting);
 	List_init(&os->processes);
-
-	List_init(&os->usedThisTime);
 	
 	os->timer = 0;
 	os->schedule_fn = 0;
@@ -58,7 +55,6 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->pid = p->pid;
 	new_pcb->events = p->events;
 
-	// ******************
 	new_pcb->usedThis = 0;
 
 	// controlliamo che il processo p abbia eventi
@@ -90,18 +86,10 @@ void OS_simStep(OS* os){
 	printf("\n********************* TIME: %08d *********************", os->timer);
 	printf("\n**********************************************************\n\n");
 
-
-	// List_free(&os->usedThisTime);
-	// List_init(&os->usedThisTime);
-
-	// int* usedPids = (int*) malloc(MAX_PROCESSES*sizeof(int));
-	// int nPids = 0;
-
 	// selezione dei processi arrivati al tempo os->timer
 	// trasformazione dei processi pronti in pcb 
 	// inserimento dei pcb in ready o waiting list
 	ListItem* aux = os->processes.first;
-	// if(aux) printf("\n%d\n", aux?1:0);
 	while (aux){
 		Process* proc = (Process*) aux;
 		Process* new_process = 0;
@@ -112,18 +100,15 @@ void OS_simStep(OS* os){
 		if (new_process) {
 			printf("\tCREATE process with pid: (%d)\n", new_process->pid);
 			new_process = (Process*) List_detach(&os->processes, (ListItem*)new_process);
-			OS_createProcess(os, new_process); // trasformo in pcb
+			OS_createProcess(os, new_process);
 			free(new_process);
 		}
 	}
 	
-
 	// numero di core disponibili
 	scheduler_args* args = (scheduler_args*) os->schedule_args;
 	int core = args->core;
 
-	
-	
 
 	// ripetere per ogni core disponibile
 	for(int i=0; i<core; i++){
@@ -133,11 +118,9 @@ void OS_simStep(OS* os){
 			printf("--------------------------------------------\n");
 		}
 
-		printPidList(&os->running, "running 1");
-		printPidList(&os->ready, "ready 1\t");
-		printPidList(&os->waiting, "waiting 1");
-		// printPidList(&os->usedThisTime, "usedThisTime 1");
-		printUsed(os, "usedThis 1");
+		#ifdef _PRINT_LIST
+			printPidLists(os, 1);
+		#endif
 
 		// controllo sul numero di processi in running
 		int runningProcess = os->running.size;
@@ -163,14 +146,12 @@ void OS_simStep(OS* os){
 		if (os->schedule_fn && runningProcess < core){
 			(*os->schedule_fn) (os, os->schedule_args);
 		}
-		
-		printPidList(&os->running, "running 2");
-		printPidList(&os->ready, "ready 2\t");
-		printPidList(&os->waiting, "waiting 2");
-		// printPidList(&os->usedThisTime, "usedThisTime 2");
-		printUsed(os, "usedThis 2");
 
 		runningProcess = os->running.size;
+
+		#ifdef _PRINT_LIST
+			printPidLists(os, 1);
+		#endif
 
 		// stampa processi in running
 		if (i==0){
@@ -180,7 +161,7 @@ void OS_simStep(OS* os){
 			aux = os->running.first;
 			while(aux) {
 				PCB* pcb = (PCB*)aux;
-				printf("\t(%d)", pcb->pid);
+				printf(" (%d)", pcb->pid);
 				aux = aux->next;
 			}
 			printf("\n");
@@ -192,27 +173,21 @@ void OS_simStep(OS* os){
 
 		// scansione della waiting list
 		aux = os->waiting.first;
-		// while( aux && ! List_find(&os->usedThisTime, aux) ) {
 		while( aux && ((PCB*)aux)->usedThis == 0 ) {
 			PCB* pcb = (PCB*)aux;
 
 			printf("while waiting, pid (%d)\n", ((PCB*)aux)->pid);
 
-			// ***************************
-			// List_pushBack(&os->usedThisTime, aux);
 			pcb->usedThis = 1;
 			
-
 			if(List_find(&os->ready, aux)){
 				printf("ATTENZIONE: pushback indesiderato in ready\n");
 				List_detach(&os->ready, aux);
 			}
 
-			printPidList(&os->running, "running 3");
-			printPidList(&os->ready, "ready 3\t");
-			printPidList(&os->waiting, "waiting 3");
-			// printPidList(&os->usedThisTime, "usedThisTime 3");
-			printUsed(os, "usedThis 3");
+			#ifdef _PRINT_LIST
+				printPidLists(os, 1);
+			#endif
 
 			
 			aux = aux->next;
@@ -264,44 +239,33 @@ void OS_simStep(OS* os){
 
 		runningProcess = os->running.size;
 
-		printPidList(&os->running, "running 4");
-		printPidList(&os->ready, "ready 4\t");
-		printPidList(&os->waiting, "waiting 4");
-		// printPidList(&os->usedThisTime, "usedThisTime 4");
-		printUsed(os, "usedThis 4");	
+		#ifdef _PRINT_LIST
+			printPidLists(os, 1);
+		#endif
 
 		// scansione dei processi in running
 		aux = os->running.first;
-		PCB* p = (PCB*)aux;
-		if(aux)printf("OS: runnable (%d)? %s\n", p->pid, ! List_find(&os->usedThisTime, aux)? "si":"no");
+
+		#ifdef _PRINT_LIST
+			// if(aux)printf("OS: runnable (%d)? %s\n", ((PCB*)aux)->pid, ((PCB*)aux)->usedThis==0? "si":"no");
+		#endif
 
 		// while( aux && ! List_find(&os->usedThisTime, aux) ) {
 		while( aux && ((PCB*)aux)->usedThis == 0 ) {
 			PCB* pcb = (PCB*)aux;
 
 			printf("while running, pid (%d)\n", ((PCB*)aux)->pid);
-			
-			// ************************
-			// List_pushBack(&(os->usedThisTime), aux);
-			pcb->usedThis = 1;
 
-			printPidList(&os->running, "running 5.0");
-			printPidList(&os->ready, "ready 5.0\t");
-			printPidList(&os->waiting, "waiting 5.0");
-			// printPidList(&os->usedThisTime, "usedThisTime 5.0");
-			printUsed(os, "usedThis 5.0");
+			pcb->usedThis = 1;
 
 			if(List_find(&os->ready, aux)){
 				printf("ATTENZIONE: pushback indesiderato in ready\n");
 				List_detach(&os->ready, aux);
 			}
 
-
-			printPidList(&os->running, "running 5");
-			printPidList(&os->ready, "ready 5\t");
-			printPidList(&os->waiting, "waiting 5");
-			// printPidList(&os->usedThisTime, "usedThisTime 5");
-			printUsed(os, "usedThis 5");	
+			#ifdef _PRINT_LIST
+				printPidLists(os, 1);
+			#endif
 
 			
 			aux = aux->next;
@@ -348,60 +312,46 @@ void OS_simStep(OS* os){
 						break;
 					}
 				}
-				// os->running = 0;
 			}
 		}
 
-		printPidList(&os->running, "running 6");
-		printPidList(&os->ready, "ready 6\t");
-		printPidList(&os->waiting, "waiting 6");
-		// printPidList(&os->usedThisTime, "usedThisTime 6");
-		printUsed(os, "usedThis 6");
-
+		#ifdef _PRINT_LIST
+			printPidLists(os, 1);
+		#endif
 		
 
 	}
 
-	// List_free(&os->usedThisTime);
-
 	setZeroUsed(&os->running);
 	setZeroUsed(&os->waiting);
 
-	//while( List_popFront(&runnable) );
-	//for(int i=0; i<runnable.size; i++){
-		//List_popFront(&runnable);
-	// }
-
 	++os->timer;
 
-	//*********
 	// sleep(1);
-	
-	// *****************
-	//free(&runnable);
 
 }
 
 void OS_destroy(OS* os) {
 }
 
-void printPidList(ListHead* head, char* name){
+void printPidList_AUX(ListHead* head, char* name, int n){
 	ListItem* item = head->first;
-	printf("+++ PRINT +++ %s:\t", name);
+	printf("+++ PRINT +++ %s %d:\t", name, n);
 	while(item){
 		PCB* pcb = (PCB*) item;
 		printf("(%d) ", pcb->pid);
 		item = item->next;
 	}
 	printf("\n");
-}
+};
 
-// void printPidArray(int* array, int n, char* name){
-// 	printf("+++ PRINT +++ %s:\t", name);
-// 	for(int i=0; i<n; i++){
-// 		printf("(%d) ", array[i]);
-// 	}
-// }
+void printPidLists(OS* os, int n){
+	printPidList_AUX(&os->running, "running", n);
+	printPidList_AUX(&os->ready, "ready   ", n);
+	printPidList_AUX(&os->waiting, "waiting", n);
+	printUsed(os, "usedThis", n);
+	printf("\n");
+};
 
 void setZeroUsed(ListHead* head){
 	ListItem* item = head->first;
@@ -412,19 +362,20 @@ void setZeroUsed(ListHead* head){
 	}
 };
 
-void printUsed(OS* os, char* name){
-	printf("+++ PRINT +++ %s:\t", name);
-	printUsedAUX(&os->running);
-	printUsedAUX(&os->waiting);
-	printUsedAUX(&os->ready);
-	printf("\n");
-};
 
-void printUsedAUX(ListHead* head){
+
+void printUsed_AUX(ListHead* head){
 	ListItem* item = head->first;
 	while(item){
 		PCB* pcb = (PCB*) item;
 		if(pcb->usedThis == 1) printf("(%d) ", pcb->pid);
 		item = item->next;
 	}
-}
+};
+void printUsed(OS* os, char* name, int n){
+	printf("+++ PRINT +++ %s %d:\t", name, n);
+	printUsed_AUX(&os->running);
+	printUsed_AUX(&os->waiting);
+	printUsed_AUX(&os->ready);
+	printf("\n");
+};

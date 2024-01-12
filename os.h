@@ -23,8 +23,6 @@ typedef struct OS{
 	void* schedule_args;
 
 	ListHead processes;
-
-	ListHead usedThisTime;
 } OS;
 
 typedef struct {
@@ -38,8 +36,6 @@ void OS_destroy(OS* os);
 
 PCB* shortestJobPCB (ListItem* item);
 
-void printPidList(ListHead* head, char* name);
-
+void printPidLists(OS* os, int n);
 void setZeroUsed(ListHead* head);
-void printUsed(OS* os, char* name);
-void printUsedAUX(ListHead* head);
+void printUsed(OS* os, char* name, int n);
