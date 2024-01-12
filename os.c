@@ -271,7 +271,6 @@ void OS_simStep(OS* os){
 			#ifdef _DEBUG
 				printPidLists(os, 5);
 			#endif
-
 			
 			aux = aux->next;
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
@@ -332,7 +331,7 @@ void OS_simStep(OS* os){
 
 	++os->timer;
 
-	// sleep(1);
+	sleep(1);
 
 }
 
@@ -386,9 +385,8 @@ int printUsed_AUX(ListHead* head){
 };
 void printUsed(OS* os, char* name, int n){
 	printf("%s %d:\t", name, n);
-	if ( ! (
-			printUsed_AUX(&os->running) ||
-			printUsed_AUX(&os->waiting) ||
-			printUsed_AUX(&os->ready) 
-	)) printf("-");
+	if (	printUsed_AUX(&os->running) +
+			printUsed_AUX(&os->waiting) +
+			printUsed_AUX(&os->ready) == 0
+	) printf("-");
 };
