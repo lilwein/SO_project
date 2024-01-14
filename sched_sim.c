@@ -6,28 +6,33 @@
 
 OS os;
 
-// typedef struct {
-// 	int core;
-// } scheduler_args;
 
 void schedulerSJF(OS* os, void* args_){
 	//scheduler_args* args = (scheduler_args*)args_;
 
-	if (! os->ready.first) {
+	ListItem* item = os->ready.first;
+
+	if (!item) {
 		#ifdef _DEBUG_SCHEDULER
 			printf("SCHEDULER: DO NOTHING (no pcb in ready)\n");
 		#endif
 		return;
 	}
 
-	ListItem* item = os->ready.first;
+	PCB* pcb = (PCB*) malloc(sizeof(PCB));
+	pcb = shortestJobPCB(item);
+
+	if (!pcb) {
+		#ifdef _DEBUG_SCHEDULER
+			printf("SCHEDULER: DO NOTHING (no pcb can run this time)\n");
+		#endif
+		return;
+	}
 	
 	#ifdef _DEBUG_SCHEDULER
 		printf("SCHEDULER: PUT ready.first pid (%d) in running\n", ((PCB*) item)->pid);
 	#endif
 
-	PCB* pcb = (PCB*) malloc(sizeof(PCB));
-	pcb = shortestJobPCB(item);
 
 	List_detach( &(os->ready), (ListItem*) pcb);
 
@@ -71,7 +76,8 @@ PCB* shortestJobPCB (ListItem* item){
 
 	PCB* next_pcb = shortestJobPCB(item->next);
 	if(!next_pcb){
-		return pcb;
+		if(pcb->usedThis) return NULL;
+		else return pcb;
 	}
 
 	ProcessEvent* next_e = (ProcessEvent*) next_pcb->events.first;

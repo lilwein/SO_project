@@ -10,8 +10,6 @@ HEADERS=linked_list.h  process.h
 
 BINS= sched_sim
 
-#disastros_test
-
 .phony: clean all
 
 

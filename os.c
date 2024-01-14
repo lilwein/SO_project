@@ -118,7 +118,6 @@ void OS_simStep(OS* os){
 			printf("--------------------------------------------\n");
 		}
 
-		// int n_print = 1;
 		#ifdef _DEBUG
 			printPidLists(os, 1);
 		#endif
@@ -140,10 +139,6 @@ void OS_simStep(OS* os){
 		//	- La rimozione di un processo dalla running list è gestita in seguito in questa funzione
 		//	- L'aggiunta di un processo alla running list è gestita dallo scheduler 
 
-		// if(os->timer==2 && i==1){
-		// 	printf("\nNO SCHEDULER");
-		// }
-		// else 
 		if (os->schedule_fn && runningProcess < core){
 			(*os->schedule_fn) (os, os->schedule_args);
 		}
@@ -325,6 +320,7 @@ void OS_simStep(OS* os){
 
 	setZeroUsed(&os->running);
 	setZeroUsed(&os->waiting);
+	setZeroUsed(&os->ready);
 
 	++os->timer;
 
