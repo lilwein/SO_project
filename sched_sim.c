@@ -76,7 +76,7 @@ PCB* shortestJobPCB (ListItem* item){
 
 	PCB* next_pcb = shortestJobPCB(item->next);
 	if(!next_pcb){
-		if(pcb->usedThis) return NULL;
+		if(pcb->usedThisTime) return NULL;
 		else return pcb;
 	}
 

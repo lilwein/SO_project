@@ -58,7 +58,7 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->pid = p->pid;
 	new_pcb->events = p->events;
 
-	new_pcb->usedThis = 0;
+	new_pcb->usedThisTime = 0;
 
 	// controlliamo che il processo p abbia eventi
 	assert( new_pcb->events.first && "Error on creation: process without events");
@@ -168,7 +168,7 @@ void OS_simStep(OS* os){
 
 		// scansione della waiting list
 		aux = os->waiting.first;
-		while( aux && ((PCB*)aux)->usedThis == 0 ) {
+		while( aux && ((PCB*)aux)->usedThisTime == 0 ) {
 			PCB* pcb = (PCB*)aux;
 			aux = aux->next;
 
@@ -176,7 +176,7 @@ void OS_simStep(OS* os){
 				printf("in waiting while: pid (%d)\n", pcb->pid);
 			#endif
 
-			pcb->usedThis = 1;
+			pcb->usedThisTime = 1;
 
 			#ifdef _DEBUG
 				printPidListsDebug(os, 3);
@@ -240,7 +240,7 @@ void OS_simStep(OS* os){
 		aux = os->running.first;
 
 		#ifdef _DEBUG
-			// if(aux)printf("OS: runnable (%d)? %s\n", ((PCB*)aux)->pid, ((PCB*)aux)->usedThis==0? "si":"no");
+			// if(aux)printf("OS: runnable (%d)? %s\n", ((PCB*)aux)->pid, ((PCB*)aux)->usedThisTime==0? "si":"no");
 		#endif
 
 
@@ -249,13 +249,13 @@ void OS_simStep(OS* os){
 			aux = aux->next;
 
 			// ***************
-			if(pcb->usedThis != 0) continue;
+			if(pcb->usedThisTime != 0) continue;
 
 			#ifdef _DEBUG
 				printf("in running while: pid (%d)\n", pcb->pid);
 			#endif
 
-			pcb->usedThis = 1;
+			pcb->usedThisTime = 1;
 
 			assert(runProcessTime<core);
 			runPids[runProcessTime] = pcb->pid;

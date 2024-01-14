@@ -13,7 +13,7 @@ void setZeroUsed(ListHead* head){
 	ListItem* item = head->first;
 	while(item){
 		PCB* pcb = (PCB*) item;
-		pcb->usedThis = 0;
+		pcb->usedThisTime = 0;
 		item = item->next;
 	}
 };
@@ -38,7 +38,7 @@ void printPidListsDebug(OS* os, int n){
 	printPidList_AUX(&os->running, "running", n);
 	printPidList_AUX(&os->ready, "ready   ", n);
 	printPidList_AUX(&os->waiting, "waiting", n);
-	printUsed(os, "usedThis", n);
+	printUsed(os, "usedThisTime", n);
 	printf("\n");
 };
 
@@ -54,7 +54,7 @@ int printUsed_AUX(ListHead* head){
 	ListItem* item = head->first;
 	while(item){
 		PCB* pcb = (PCB*) item;
-		if(pcb->usedThis == 1){
+		if(pcb->usedThisTime == 1){
 			printf("(%d) ", pcb->pid);
 			r = 1;
 		}
