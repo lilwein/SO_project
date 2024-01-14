@@ -4,9 +4,10 @@ CCDEBUG= -D_LIST_DEBUG_ #-D_DEBUG #-D_DEBUG_SCHEDULER
 
 OBJS=linked_list.o\
 	 process.o\
-     os.o
+     os.o\
+	 aux.o
 
-HEADERS=linked_list.h  process.h
+HEADERS=linked_list.h process.h os.h aux.h
 
 BINS= sched_sim
 

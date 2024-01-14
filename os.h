@@ -36,10 +36,3 @@ void OS_destroy(OS* os);
 
 PCB* shortestJobPCB (ListItem* item);
 
-void printPidLists(OS* os);
-
-void printPidListsDebug(OS* os, int n);
-void setZeroUsed(ListHead* head);
-void printUsed(OS* os, char* name, int n);
-
-void printEscape(char* str);
