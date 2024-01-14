@@ -8,6 +8,8 @@
 
 #define MAX_PROCESSES 1024
 
+int stampa = 1;
+
 void OS_init(OS* os) {
 	
 	List_init(&os->running);
@@ -81,15 +83,20 @@ void OS_createProcess(OS* os, Process* p) {
 
 
 void OS_simStep(OS* os){
-	
-	printf("\n**********************************************************");
-	printf("\n********************* TIME: %08d *********************", os->timer);
-	printf("\n**********************************************************\n\n");
+	// printf("\e[5mMd.Mehedi hasan\e[m");
+	// printf("\x1b[2;37;41mWorld");
+	// printf("\e[1;31maaaaaaaaaa\e[0m");
+
+	printEscape("7;1;8"); printf("\n*************************"); printEscape("28");
+	printf("TIME: %08d", os->timer);
+	printEscape("8"); printf("*************************\n"); printEscape("0");
+
 
 	// selezione dei processi arrivati al tempo os->timer
 	// trasformazione dei processi pronti in pcb 
 	// inserimento dei pcb in ready o waiting list
 	ListItem* aux = os->processes.first;
+	int create = 0;
 	while (aux){
 		Process* proc = (Process*) aux;
 		Process* new_process = 0;
@@ -98,35 +105,40 @@ void OS_simStep(OS* os){
 		}
 		aux = aux->next;
 		if (new_process) {
-			printf("\tCREATE process with pid: (%d)\n", new_process->pid);
+			if(!create){
+				printf("----------------------------------------------------------------\n");
+				printEscape("1;3"); printf("\tCreate process with pid:"); printEscape("0");
+			}
+			printf(" "); printEscape("1;3;44"); printf("(%d)", new_process->pid); printEscape("0");
 			new_process = (Process*) List_detach(&os->processes, (ListItem*)new_process);
 			OS_createProcess(os, new_process);
 			free(new_process);
+			create++;
 		}
 	}
+	if(create) printf("\n");
 	
 	// numero di core disponibili
 	scheduler_args* args = (scheduler_args*) os->schedule_args;
 	int core = args->core;
 
+	int runProcessTime = 0;
+	int* runPids = (int*) malloc(core*sizeof(int));
 
 	// ripetere per ogni core disponibile
 	for(int i=0; i<core; i++){
-		if(i>0) {
-			printf("--------------------------------------------\n");
-			printf("\t#### CORE %d ####\n", i+1);
-			printf("--------------------------------------------\n");
-		}
+		
+		printf("----------------------------------------------------------------\n");
+		printEscape("1;3;7"); printf("\tCORE %d \n", i+1); printEscape("0");
 
 		#ifdef _DEBUG
-			printPidLists(os, 1);
+			printPidListsDebug(os, 1);
 		#endif
 
 		// controllo sul numero di processi in running
-		int runningProcess = os->running.size;
 
-		assert( runningProcess <= core && "Error: too many process in running" );
-		assert( runningProcess >= 0 && "Error: invalid size of running list" );
+		assert( os->running.size <= core && "Error: too many process in running" );
+		assert( os->running.size >= 0 && "Error: invalid size of running list" );
 
 		// invocare lo scheduler se verificate le seguenti condizioni: 
 		// 	1) scheduler è definito;
@@ -139,32 +151,18 @@ void OS_simStep(OS* os){
 		//	- La rimozione di un processo dalla running list è gestita in seguito in questa funzione
 		//	- L'aggiunta di un processo alla running list è gestita dallo scheduler 
 
-		if (os->schedule_fn && runningProcess < core){
+		if (os->schedule_fn && os->running.size < core){
 			(*os->schedule_fn) (os, os->schedule_args);
 		}
 
-		runningProcess = os->running.size;
+		if(stampa)printPidLists(os);
 
 		#ifdef _DEBUG
-			printPidLists(os, 2);
+			printPidListsDebug(os, 2);
 		#endif
 
-		// stampa processi in running
-		if (i==0){
-			printf("--------------------------------------------\n");
-			if(!runningProcess) printf("\tno processes are running");
-			else printf("\t%d processes are running:", runningProcess);
-			aux = os->running.first;
-			while(aux) {
-				PCB* pcb = (PCB*)aux;
-				printf(" (%d)", pcb->pid);
-				aux = aux->next;
-			}
-			printf("\n");
-			printf("--------------------------------------------\n");
-			printf("\t#### CORE %d ####\n", i+1);
-			printf("--------------------------------------------\n");
-		}
+		
+		
 		
 
 		// scansione della waiting list
@@ -180,24 +178,25 @@ void OS_simStep(OS* os){
 			pcb->usedThis = 1;
 
 			#ifdef _DEBUG
-				printPidLists(os, 3);
+				printPidListsDebug(os, 3);
 			#endif
 
 			
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
-			printf("\twaiting process: (%d)\n", pcb->pid);
+			printf("\t\twaiting process: ");
+			printEscape("1;3;43"); printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
 
 			// controlliamo che il pcb abbia l'evento di tipo IO
 			assert(e->type==IO);
 			
 			// è passata un'epoca: decremento della durata rimanente
 			e->duration-- ;
-			printf("\t\tremaining time: %d\n",e->duration);
+			printf("\t\t\tremaining time: %d\n",e->duration);
 			
 			// se l'IO BURST non è terminato, si passa al prossimo processo
 			// se l'IO BURST è terminato,
 			if (e->duration == 0) {
-				printf("\t\tend IO BURST for process (%d)\n", pcb->pid);
+				printf("\t\t\tend IO BURST for process (%d)\n", pcb->pid);
 				
 				// eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
@@ -208,7 +207,7 @@ void OS_simStep(OS* os){
 				
 				// eventi finiti: kill process
 				if (! pcb->events.first) {
-					printf("\t\tend process (%d)\n", pcb->pid);
+					printf("\t\t\tend process (%d)\n", pcb->pid);
 					free(pcb);
 				}
 				// ci sono ancora eventi di tipo CPU o IO
@@ -218,11 +217,11 @@ void OS_simStep(OS* os){
 					// trasferimento del pcb in ready o waiting list
 					switch (e->type){
 					case CPU:
-						printf("\t\t(%d) move to ready\n", pcb->pid);
+						printf("\t\t\t(%d) move to ready\n", pcb->pid);
 						List_pushBack(&os->ready, (ListItem*) pcb);
 						break;
 					case IO:
-						printf("\t\t(%d) move to waiting\n", pcb->pid);
+						printf("\t\t\t(%d) move to waiting\n", pcb->pid);
 						List_pushBack(&os->waiting, (ListItem*) pcb);
 						break;
 					}
@@ -230,10 +229,10 @@ void OS_simStep(OS* os){
 			}
 		}
 
-		runningProcess = os->running.size;
+
 
 		#ifdef _DEBUG
-			printPidLists(os, 4);
+			printPidListsDebug(os, 4);
 		#endif
 
 		// scansione dei processi in running
@@ -257,26 +256,31 @@ void OS_simStep(OS* os){
 
 			pcb->usedThis = 1;
 
+			assert(runProcessTime<core);
+			runPids[runProcessTime] = pcb->pid;
+			runProcessTime++;
+
 
 			#ifdef _DEBUG
-				printPidLists(os, 5);
+				printPidListsDebug(os, 5);
 			#endif
 			
 			
 			ProcessEvent* e = (ProcessEvent*) pcb->events.first;
-			printf("\trunning pid: (%d)\n", pcb->pid);
+			printf("\t\trunning process: ");
+			printEscape("1;3;48;5;28"); printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
 			
 			// controlliamo che il pcb abbia l'evento di tipo CPU
 			assert(e->type==CPU);
 
 			// è passata un'epoca: decremento della durata rimanente
 			e->duration--;
-			printf("\t\tremaining time:%d\n",e->duration);
+			printf("\t\t\tremaining time: %d\n",e->duration);
 
 			// se il CPU BURST non è terminato, si passa al prossimo processo
 			// se il CPU BURST è terminato,
 			if (e->duration == 0) {
-				printf("\t\tend CPU BURST for process (%d)\n", pcb->pid);
+				printf("\t\t\tend CPU BURST for process (%d)\n", pcb->pid);
 
 				// eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
@@ -287,7 +291,7 @@ void OS_simStep(OS* os){
 
 				// eventi finiti: kill process
 				if (! pcb->events.first) {
-					printf("\t\tend process (%d)\n", pcb->pid);
+					printf("\t\t\tend process (%d)\n", pcb->pid);
 					free(pcb);
 				}
 				// ci sono ancora eventi di tipo CPU o IO
@@ -297,11 +301,11 @@ void OS_simStep(OS* os){
 					// trasferimento del pcb in ready o waiting list
 					switch (e->type){
 					case CPU:
-						printf("\t\t(%d) move to ready\n", pcb->pid);
+						printf("\t\t\t(%d) move to ready\n", pcb->pid);
 						List_pushBack(&os->ready, (ListItem*) pcb);
 						break;
 					case IO:
-						printf("\t\t(%d) move to waiting\n", pcb->pid);
+						printf("\t\t\t(%d) move to waiting\n", pcb->pid);
 						List_pushBack(&os->waiting, (ListItem*) pcb);
 						break;
 					}
@@ -310,13 +314,25 @@ void OS_simStep(OS* os){
 			// ***************************
 			break;
 		}
+		
+		if(stampa)printPidLists(os);
 
 		#ifdef _DEBUG
-			printPidLists(os, 6);
+			printPidListsDebug(os, 6);
 		#endif
 		
 
 	}
+
+	// stampa processi runnati
+		printf("----------------------------------------------------------------\n");
+		if(!runProcessTime) printf("\tno process has been run");
+		else printf("\t%d processes have been run:", runProcessTime);
+		for(int k=0; k<runProcessTime; k++){
+			printf(" (%d)", runPids[k]);
+		}
+		printf("\n----------------------------------------------------------------");
+		printf("\n");
 
 	setZeroUsed(&os->running);
 	setZeroUsed(&os->waiting);
@@ -342,9 +358,10 @@ void setZeroUsed(ListHead* head){
 
 void printPidList_AUX(ListHead* head, char* name, int n){
 	ListItem* item = head->first;
-	printf("%s %d:\t", name, n);
+	if(n==-1) printf("%s:\t", name);
+	else printf("%s %d:\t", name, n);
 	if(!item){
-		printf("-\n");
+		printf(" -\n");
 		return;
 	}
 	while(item){
@@ -354,12 +371,19 @@ void printPidList_AUX(ListHead* head, char* name, int n){
 	}
 	printf("\n");
 };
-void printPidLists(OS* os, int n){
+void printPidListsDebug(OS* os, int n){
 	printf("+++++ LISTS %d +++++\n", n);
 	printPidList_AUX(&os->running, "running", n);
 	printPidList_AUX(&os->ready, "ready   ", n);
 	printPidList_AUX(&os->waiting, "waiting", n);
 	printUsed(os, "usedThis", n);
+	printf("\n");
+};
+
+void printPidLists(OS* os){
+	printPidList_AUX(&os->running, "running", -1);
+	printPidList_AUX(&os->ready, "ready   ", -1);
+	printPidList_AUX(&os->waiting, "waiting",-1);
 	printf("\n");
 };
 
@@ -383,3 +407,10 @@ void printUsed(OS* os, char* name, int n){
 			printUsed_AUX(&os->ready) == 0
 	) printf("-");
 };
+
+void printEscape(char* str){
+	#ifdef _NO_ANSI
+		return;
+	#endif
+	printf("\e[%sm", str);
+}
