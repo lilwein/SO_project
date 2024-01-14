@@ -8,7 +8,7 @@ typedef struct {
 	int pid;
 	ListHead events;
 
-	int usedThisTime;
+	char usedThisTime;
 } PCB;
 
 struct OS;
