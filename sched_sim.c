@@ -74,6 +74,11 @@ void schedulerSJF(OS* os, void* args_){
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
 	assert(e->type==CPU);
 
+	/* Se la durata dell'evento supera quella del quantum prediction, si deve dividere l'evento in due eventi.
+		Il primo evento, qe, viene creato e differisce da quello originale poichè la sua durata equivale al
+		quantum prediction. Il secondo evento, che segue l'evento qe creato, è l'evento originale stesso ma con 
+		la durata rimasta.
+	*/
 	if ( e->duration > e->quantum ) { 
 		ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
 		qe->list.prev = 0;
@@ -86,9 +91,8 @@ void schedulerSJF(OS* os, void* args_){
 
 		e->duration = e->duration - e->quantum;
 		e->quantum = e->next_prediction;
-		// e->next_prediction = e->next_prediction;
 
-		List_pushFront(&pcb->events, (ListItem*)qe); // aggiunge in testa
+		List_pushFront(&pcb->events, (ListItem*)qe);
 	}
 };
 
