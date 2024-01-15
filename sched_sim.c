@@ -74,18 +74,18 @@ void schedulerSJF(OS* os, void* args_){
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
 	assert(e->type==CPU);
 
-	if ( e->duration > e->prediction ) { 
+	if ( e->duration > e->quantum ) { 
 		ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
 		qe->list.prev = 0;
 		qe->list.next = 0;
 		qe->type = CPU;
 
-		qe->duration = e->prediction;
-		qe->prediction = e->next_prediction;
+		qe->duration = e->quantum;
+		qe->quantum = e->next_prediction;
 		qe->next_prediction = e->next_prediction;
 
-		e->duration = e->duration - e->prediction;
-		e->prediction = e->next_prediction;
+		e->duration = e->duration - e->quantum;
+		e->quantum = e->next_prediction;
 		// e->next_prediction = e->next_prediction;
 
 		List_pushFront(&pcb->events, (ListItem*)qe); // aggiunge in testa
@@ -113,7 +113,7 @@ PCB* shortestJobPCB (ListItem* item){
 	}
 
 	ProcessEvent* next_e = (ProcessEvent*) next_pcb->events.first;
-	if( e->prediction <= next_e->prediction ) return pcb;
+	if( e->quantum <= next_e->quantum ) return pcb;
 	else return next_pcb;
 };
 

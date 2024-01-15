@@ -8,7 +8,7 @@ typedef struct {
 	ListItem list;
 	ResourceType type;
 	int duration;
-	int prediction;
+	int quantum;
 	int next_prediction;
 } ProcessEvent;
 

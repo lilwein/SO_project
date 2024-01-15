@@ -46,7 +46,7 @@ int Process_load(Process* p, const char* filename) {
 			e->list.next = 0;
 			e->type = CPU;
 			e->duration = duration;
-			e->prediction = -1;
+			e->quantum = -1;
 			e->next_prediction = -1;
 			List_pushBack(&p->events, (ListItem*)e);
 			++num_events;
@@ -60,7 +60,7 @@ int Process_load(Process* p, const char* filename) {
 			e->list.next = 0;
 			e->type = IO;
 			e->duration = duration;
-			e->prediction = -1;
+			e->quantum = -1;
 			e->next_prediction = -1;
 			List_pushBack(&p->events, (ListItem*)e);
 			++num_events;
@@ -86,13 +86,13 @@ void Process_CalculatePrediction(Process* p){
 	while(aux){
 		ProcessEvent* e = (ProcessEvent*) aux;
 		assert(e->type == CPU);
-		assert(e->prediction == -1);
+		assert(e->quantum == -1);
 		assert(e->next_prediction == -1);
 		
-		if(first_event) e->prediction = e->duration;
-		else e->prediction = quantum_pred;
+		if(first_event) e->quantum = e->duration;
+		else e->quantum = quantum_pred;
 
-		double qp = e->duration * DECAY_COEFF + e->prediction * (1-DECAY_COEFF);
+		double qp = e->duration * DECAY_COEFF + e->quantum * (1-DECAY_COEFF);
 		quantum_pred = round(qp);
 		e->next_prediction = quantum_pred;
 
