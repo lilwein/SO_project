@@ -28,9 +28,6 @@ Per integrare il concetto di preemption con lo SJB, andremo a predire il prossim
 Nel caso base, cioè quando un processo arriva, useremo la durata reale dell'evento come quantum prediction.
 */
 
-
-
-
 void schedulerSJF(OS* os, void* args_){
 	//scheduler_args* args = (scheduler_args*)args_;
 
@@ -118,4 +115,3 @@ PCB* shortestJobPCB (ListItem* item){
 	if( e->quantum <= next_e->quantum ) return pcb;
 	else return next_pcb;
 };
-
