@@ -1,7 +1,6 @@
-#include "process.h"
+#pragma once
 #include "linked_list.h"
 #include "os.h"
-#pragma once
 
 void printPidLists(OS* os);
 

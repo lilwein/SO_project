@@ -1,7 +1,6 @@
-#include "process.h"
-#include "linked_list.h"
 #pragma once
-
+#include "linked_list.h"
+#include "process.h"
 
 typedef struct {
 	ListItem list;
@@ -29,10 +28,6 @@ typedef struct {
 	int core;
 } scheduler_args;
 
-
 void OS_init(OS* os);
 void OS_simStep(OS* os);
 void OS_destroy(OS* os);
-
-PCB* shortestJobPCB (ListItem* item);
-

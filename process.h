@@ -3,7 +3,6 @@
 
 typedef enum {CPU=0, IO=1} ResourceType;
 
-// evento di un processo
 typedef struct {
 	ListItem list;
 	ResourceType type;
@@ -12,7 +11,6 @@ typedef struct {
 	int next_prediction;
 } ProcessEvent;
 
-// processo
 typedef struct {
 	ListItem list;
 	int pid;
@@ -20,8 +18,7 @@ typedef struct {
 	ListHead events;
 } Process;
 
-void Process_CalculatePrediction(Process* p);
-
 int Process_load(Process* p, const char* filename);
-
 int Process_save(const Process* p, const char* filename);
+
+void Process_CalculatePrediction(Process* p);

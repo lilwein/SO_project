@@ -1,11 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <math.h>
-#include <unistd.h>
-
-#include "aux.h"
 #include "os.h"
+#include "aux.h"
 
 #define MAX_PROCESSES 1024
 
