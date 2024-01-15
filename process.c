@@ -8,7 +8,7 @@
 
 #define DECAY_COEFF 0.5
 
-int Process_load(Process* p, const char* filename) {
+int Process_load_file(Process* p, const char* filename) {
 	
 	FILE* f = fopen(filename, "r");
 	if (!f) return -1;
@@ -106,7 +106,7 @@ void Process_CalculatePrediction(Process* p){
 }
 
 
-int Process_save(const Process* p, const char* filename){
+int Process_save_file(const Process* p, const char* filename){
 	
 	FILE* f = fopen(filename, "w");
 	if (!f) return -1;

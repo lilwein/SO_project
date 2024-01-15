@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 
 	for (int i=2; i<argc; ++i){
 		Process new_process;
-		int num_events = Process_load(&new_process, argv[i]);
+		int num_events = Process_load_file(&new_process, argv[i]);
 		Process_CalculatePrediction(&new_process);
 
 		printf("loading [%s], pid: %d, events:%d", argv[i], new_process.pid, num_events);

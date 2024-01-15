@@ -18,7 +18,7 @@ typedef struct {
 	ListHead events;
 } Process;
 
-int Process_load(Process* p, const char* filename);
-int Process_save(const Process* p, const char* filename);
+int Process_load_file(Process* p, const char* filename);
+int Process_save_file(const Process* p, const char* filename);
 
 void Process_CalculatePrediction(Process* p);
