@@ -87,6 +87,7 @@ void Process_CalculatePrediction(Process* p){
 		ProcessEvent* e = (ProcessEvent*) aux;
 		assert(e->type == CPU);
 		assert(e->prediction == -1);
+		assert(e->next_prediction == -1);
 		
 		if(first_event) e->prediction = e->duration;
 		else e->prediction = quantum_pred;
@@ -98,6 +99,8 @@ void Process_CalculatePrediction(Process* p){
 		first_event = 0;
 		aux = aux->next;
 		if(aux==NULL) break;
+		e = (ProcessEvent*) aux;
+		assert(e->type == IO);
 		aux = aux->next;
 	}
 }
