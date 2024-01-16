@@ -4,6 +4,9 @@
 #include <math.h>
 #include <unistd.h>
 
+#include <string.h>
+#include <ctype.h>
+
 #include <termios.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -21,6 +24,69 @@ ListItem* List_find_process(ListHead* head, ListItem* item) {
 		aux=aux->next;
 	}
   return 0;
+};
+
+int gets_core(int lenght, char* message){
+	char* string = (char*) malloc(lenght);
+	int number;
+	char ok = 1;
+	while(ok){
+		printf("\n\e[48;5;234m");
+		printf("%s", message);
+		printf("\e[0m ");
+		fgets(string, lenght, stdin);
+		for(int i=0; i<strlen(string)-1; i++){
+			if(!isdigit(string[i])){
+				printf("Invalid value, please insert a number\n");
+				ok = 0;
+				break;
+			}
+		}
+		if(!ok){
+			ok = 1;
+			continue;
+		}
+		number = atoi(string);
+		if(number<1 || number>10){
+			printf("Invalid number, please try again\n");
+			continue;
+		}
+		ok = 0;
+	}
+	return number;
+};
+
+int gets_steps(int lenght, char* message){
+	char* string = (char*) malloc(lenght);
+	int number;
+	char ok = 1;
+	while(ok){
+		printf("\n\e[48;5;234m");
+		printf("%s", message);
+		printf("\e[0m ");
+		fgets(string, lenght, stdin);
+		if(!strcmp(string, "all\n")) return 0;
+		if(!strcmp(string, "\n")) return 1;
+		if(!strcmp(string, "q\n")) return -1;
+		for(int i=0; i<strlen(string)-1; i++){
+			if(!isdigit(string[i])){
+				printf("Invalid value, please insert a number\n");
+				ok = 0;
+				break;
+			}
+		}
+		if(!ok){
+			ok = 1;
+			continue;
+		}
+		number = atoi(string);
+		if(number<0){
+			printf("Invalid number, please try again\n");
+			continue;
+		}
+		ok = 0;
+	} 
+	return number;
 };
 
 void setZeroUsed(ListHead* head){

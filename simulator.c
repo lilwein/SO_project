@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 			continue;
 		}
 		else if(loading_mode=='q'){
-			printf("%s", message_goodbye);
+			printf("\n%s\n", message_goodbye);
 			return EXIT_SUCCESS;
 		}
 		else{
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 				if(yn=='y') goto insert_filename;
 				else if(yn=='n'){
 					if(! &os.processes.size){
-						printf("%s", message_goodbye);
+						printf("\n%s\n", message_goodbye);
 						return EXIT_SUCCESS;
 					}
 					break;
@@ -158,37 +158,35 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		char* core_str = (char*) malloc(16);
-		int core;
-		char ok = 1;
-		while(ok){
-			printf("\n\e[48;5;234mInsert number of available CPUs:\e[0m ");
-			fgets(core_str, 16, stdin);
-			for(int i=0; i<strlen(core_str)-1; i++){
-				if(!isdigit(core_str[i])){
-					printf("Invalid value, please insert a number\n");
-					ok = 0;
-					break;
-				}
-			}
-			if(!ok){
-				ok = 1;
-				continue;
-			}
-			core = atoi(core_str);
-			if(core<1 || core>10){
-				printf("Invalid number, please try again\n");
-				continue;
-			}
-			ok = 0;
-		} 
-		printf("\n");
-
+		int core = gets_core(16, "Insert number of available CPUs:");
 		srr_args.core = core;
+		printf("\nNumber of CPUs: %d\n", core);
 		
 		// printf("num processes in queue %d\n", os.processes.size);
-		while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) {
-			OS_simStep(&os);
+
+		char run = 1;
+		int steps;
+		while(run) {
+			steps = gets_steps(16, "How many steps do you want to go forward? (\e[1;3m0\e[22;23m or \e[1;3mall\e[22;23m for skip to end, \e[1;3mENTER\e[22;23m for one step, \e[1;3mq\e[22;23m for quit)");
+			// printf("\nsteps= %d", steps);
+			if(steps==-1) break;
+			else if(steps==0){
+				// printf("\nsteps= %d", steps);
+				while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) OS_simStep(&os);
+				run = 0;
+				break;
+			}
+			else {
+				for(int i=0; i<steps; i++){
+					// printf("\nsteps= %d", steps);
+
+					if(!(os.running.first || os.ready.first || os.waiting.first || os.processes.first)){
+						run = 0;
+						break;
+					}
+					OS_simStep(&os);
+				}
+			}
 		}
 	}
 
@@ -200,7 +198,7 @@ int main(int argc, char** argv) {
 
 
 
-
+	printf("\n%s\n", message_goodbye);
 	return EXIT_SUCCESS;
 	// *** inserire controlli numero di argomenti
 
