@@ -9,7 +9,7 @@
 
 #define MAX_SIZE_STRING 1024
 
-char* message_welcome = "\e[1;7mWelcome to CPU Scheduler Simulator: Preemptive scheduler with Shortest Job First\e[0m\n\n";
+char* message_welcome = "\e[1;7m\nWelcome to CPU Scheduler Simulator: Preemptive scheduler with Shortest Job First\e[0m\n\n";
 char* message_press_1 = "\e[48;5;234mPress \e[1;3mf\e[22;23m for loading processes from file or \e[1;3mi\e[22;23m for loading processes in line (\e[1;3mh\e[22;23m for help, \e[1;3mq\e[22;23m for quit)\e[0m\n\n";
 char* message_help_1 = "\e[4mLoading from file:\e[24m the simulator will load the processes written in txt file in \"processes\" folder. Txt file should be like:\n\n\tPROCESS\t\t[id] [arrival time]\n\tCPU_BURST\t[duration]\n\tIO_BURST\t[duration]\n\t...\t\t...\n\nFile must terminate with a IO_BURST line.\n\n\e[4mLoading in line:\e[24m the simulator will load the processes when you ask for it.\n\n";
 char* message_invalid = "Invalid button, please try again\n";
@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
 	printf("%s", message_welcome);
 	printf("%s", message_press_1);
 
+	// Modalità di inserimento dei processi
 	int loading_mode;
 	while(1){
 		changemode(1);
@@ -46,15 +47,17 @@ int main(int argc, char** argv) {
 		}
 	}
 
-
+	// Inserimento via file
 	if(loading_mode=='f'){
 		printf("\e[1;7mLOADING FROM FILE\e[0m\n");
 		
+		// Inizializzazione OS
 		OS_init(&os);
 		scheduler_args srr_args;
 		os.schedule_args = &srr_args;
 		os.schedule_fn = schedulerSJF;
 
+		// Inserimento filename
 		insert_filename: ;
 		char* files = (char*) malloc(MAX_SIZE_STRING);
 		do{
@@ -66,9 +69,9 @@ int main(int argc, char** argv) {
 		int processes_ok = 0;
 		int processes_not_ok = 0;
 
+		// Scansione riga di comando tramite token
 		char* token = strtok(files, " \n");
 		while(token){
-			// printf("token:\t%s\t", token);
 			char* copy = (char*) malloc(strlen(token)+1);
 			strcpy(copy, token);
 			char* path = "processes/";
@@ -77,9 +80,9 @@ int main(int argc, char** argv) {
 			strcpy(filename, path);
 			strcat(filename, copy);
 			strcat(filename, extension);
-			// printf("\tfilename:\t%s\n", filename);
 			free(copy);
 			
+			// Inizializzazione processo
 			Process new_process;
 			int num_events = Process_load_file(&new_process, filename);
 			if(num_events==-1){
@@ -90,8 +93,11 @@ int main(int argc, char** argv) {
 				continue;
 			}
 			processes_ok ++;
+			
+			// Calcolo dei quantum predtcion
 			Process_CalculatePrediction(&new_process);
 
+			// Se ci sono eventi, inserimento del processo nella lista dei processi
 			if (num_events) {
 				Process* new_process_ptr = (Process*)malloc(sizeof(Process));
 				*new_process_ptr = new_process;
@@ -110,6 +116,8 @@ int main(int argc, char** argv) {
 			token = strtok(NULL, " \n");
 		}
 		free(files);
+
+		// Nessun processo inserito o errore nell'inserimento
 		if(!processes_ok || processes_not_ok){
 			printf("\n");
 			if(!processes_ok) printf("\e[48;5;234mNo process has ben loaded. \e[0m");
@@ -140,6 +148,7 @@ int main(int argc, char** argv) {
 		printPidList_AUX(&os.processes, "processes", -1);
 		printf("\n");
 
+		// Nuovi inserimenti
 		printf("\e[48;5;234mDo you want to load more processes? (\e[1;3my\e[22;23m for yes, \e[1;3mn\e[22;23m for no)\e[0m\n");
 		int yn;
 		while(1){
@@ -158,28 +167,24 @@ int main(int argc, char** argv) {
 			}
 		}
 
+		// Inserimento numero di core
 		int core = gets_core(16, "Insert number of available CPUs:");
 		srr_args.core = core;
 		printf("\nNumber of CPUs: %d\n", core);
-		
-		// printf("num processes in queue %d\n", os.processes.size);
 
+		// START
 		char run = 1;
 		int steps;
 		while(run) {
 			steps = gets_steps(16, "How many steps do you want to go forward? (\e[1;3m0\e[22;23m or \e[1;3mall\e[22;23m for skip to end, \e[1;3mENTER\e[22;23m for one step, \e[1;3mq\e[22;23m for quit)");
-			// printf("\nsteps= %d", steps);
 			if(steps==-1) break;
 			else if(steps==0){
-				// printf("\nsteps= %d", steps);
 				while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) OS_simStep(&os);
 				run = 0;
 				break;
 			}
 			else {
 				for(int i=0; i<steps; i++){
-					// printf("\nsteps= %d", steps);
-
 					if(!(os.running.first || os.ready.first || os.waiting.first || os.processes.first)){
 						run = 0;
 						break;
@@ -188,6 +193,7 @@ int main(int argc, char** argv) {
 				}
 			}
 		}
+		// STOP
 	}
 
 	else if(loading_mode=='i'){
