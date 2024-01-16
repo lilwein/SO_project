@@ -9,23 +9,96 @@
 
 #define MAX_SIZE_STRING 1024
 
-char* message_welcome = "\e[1;7m\nWelcome to CPU Scheduler Simulator: Preemptive scheduler with Shortest Job First\e[0m\n\n";
-char* message_press_1 = "\e[48;5;234mPress \e[1;3mf\e[22;23m for loading processes from file or \e[1;3mi\e[22;23m for loading processes in line (\e[1;3mh\e[22;23m for help, \e[1;3mq\e[22;23m for quit)\e[0m\n\n";
-char* message_help_1 = "\e[4mLoading from file:\e[24m the simulator will load the processes written in txt file in \"processes\" folder. Txt file should be like:\n\n\tPROCESS\t\t[id] [arrival time]\n\tCPU_BURST\t[duration]\n\tIO_BURST\t[duration]\n\t...\t\t...\n\nFile must terminate with a IO_BURST line.\n\n\e[4mLoading in line:\e[24m the simulator will load the processes when you ask for it.\n\n";
-char* message_invalid = "Invalid button, please try again\n";
 
-char* message_goodbye = "\e[1;7mThank you for using CPU Scheduler Simulator!\e[0m\n";
+void print_message_e(char type){
+	if(type==1){
+		// 1: welcome
+		char* message = "\nWelcome to CPU Scheduler Simulator: Preemptive scheduler with Shortest Job First\n\n";
+		printEscape("1;7");	printf("%s", message); printEscape("0");
+	}
+	else if(type==2){
+		// 2: press
+		char* message_1 = "Press ";
+		char* message_2 = " for loading processes from file or ";
+		char* message_3 = " for loading processes in line (";
+		char* message_4 = " for help, ";
+		char* message_5 = " for quit)";
+		printEscape("48;5;234"); printf("%s", message_1); printEscape("1;3"); printf("f"); printEscape("22;23"); printf("%s", message_2); 
+		printEscape("1;3"); printf("i"); printEscape("22;23"); printf("%s", message_3); 
+		printEscape("1;3"); printf("h"); printEscape("22;23"); printf("%s", message_4); 
+		printEscape("1;3"); printf("q"); printEscape("22;23"); printf("%s", message_5); printEscape("0"); printf("\n\n");
+	}
+	else if(type==3){
+		// 3: help
+		char* message_1 = "Loading from file:";
+		char* message_2 = " the simulator will load the processes written in txt file in \"processes\" folder. Txt file should be like:\n\n\tPROCESS\t\t[id] [arrival time]\n\tCPU_BURST\t[duration]\n\tIO_BURST\t[duration]\n\t...\t\t...\n\nFile must terminate with a IO_BURST line.\n\n";
+		char* message_3 = "Loading in line:";
+		char* message_4 = " the simulator will load the processes when you ask for it.\n\n";
+		printEscape("4"); printf("%s", message_1); printEscape("24");
+		printf("%s", message_2); printEscape("24");
+		printEscape("4"); printf("%s", message_3); printEscape("24");
+		printf("%s", message_4);
+	}
+	else if(type==4){
+		// 4: invalid button
+		printf("Invalid button, please try again\n");
+	}
+	else if(type==5){
+		// 5: goodbye
+		printEscape("1;7"); printf("Thank you for using CPU Scheduler Simulator!"); printEscape("0"); printf("\n");
+	}
+	else if(type==6){
+		// 6: loading from file
+		printEscape("1;7"); printf("LOADING FROM FILE"); printEscape("0"); printf("\n");
+	}
+	else if(type==7){
+		// 7: loading in line
+		printEscape("1;7"); printf("LOADING IN LINE"); printEscape("0"); printf("\n");
+	}
+	else if(type==8){
+		// 8: insert processes
+		printEscape("48;5;234"); printf("Insert txt files contained in ");
+		printEscape("3"); printf("processes"); printEscape("23");
+		printf(" folder (ex: p1 p2 p3):"); printEscape("0"); printf(" ");
+	}
+	else if(type==9){
+		// 9: no process loaded
+		printEscape("48;5;234"); printf("No process has ben loaded. "); printEscape("0");
+	}
+	else if(type==10){
+		// 10: try again
+		char* message = "Do you want to try again? (";
+		printEscape("48;5;234"); printf("%s", message);
+		printEscape("1;3"); printf("y"); printEscape("22;23"); printf(" for yes, ");
+		printEscape("1;3"); printf("n"); printEscape("22;23"); printf(" for no)"); printEscape("0");
+		printf("\n");
+	}
+	else if(type==11){
+		// 11: nuovi processi
+		char* message = "Do you want to load more processes? (";
+		printf("\n"); printEscape("48;5;234"); printf("%s", message);
+		printEscape("1;3"); printf("y"); printEscape("22;23"); printf(" for yes, ");
+		printEscape("1;3"); printf("n"); printEscape("22;23"); printf(" for no)"); printEscape("0");
+		printf("\n");
+	}
+	else if(type==12){
+
+	}
+	else assert(0 && "invalid argument");
+
+}
 
 
 OS os;
 
 int main(int argc, char** argv) {
-	printf("%s", message_welcome);
-	printf("%s", message_press_1);
+	print_message_e(1);
+	print_message_e(2);
 
 	// Modalità di inserimento dei processi
 	int loading_mode;
 	while(1){
+		fflush(stdout);
 		changemode(1);
 		while(!kbhit()){}
 		loading_mode = getchar();
@@ -33,23 +106,23 @@ int main(int argc, char** argv) {
 
 		if(loading_mode=='f' || loading_mode=='i') break;
 		else if(loading_mode=='h'){
-			printf("%s", message_help_1);
-			printf("%s", message_press_1);	
+			print_message_e(3);
+			print_message_e(2);
 			continue;
 		}
 		else if(loading_mode=='q'){
-			printf("\n%s\n", message_goodbye);
+			print_message_e(5);
 			return EXIT_SUCCESS;
 		}
 		else{
-			printf("%s", message_invalid);
+			print_message_e(4);
 			continue;
 		}
 	}
 
 	// Inserimento via file
 	if(loading_mode=='f'){
-		printf("\e[1;7mLOADING FROM FILE\e[0m\n");
+		print_message_e(6);
 		
 		// Inizializzazione OS
 		OS_init(&os);
@@ -61,7 +134,7 @@ int main(int argc, char** argv) {
 		insert_filename: ;
 		char* files = (char*) malloc(MAX_SIZE_STRING);
 		do{
-			printf("\e[48;5;234mInsert txt files contained in \e[3mprocesses\e[23m folder (ex: p1 p2 p3):\e[0m ");
+			print_message_e(8);
 			fgets(files, MAX_SIZE_STRING, stdin);
 		} while( !strcmp(files, "\n") );
 		printf("\n");
@@ -120,9 +193,12 @@ int main(int argc, char** argv) {
 		// Nessun processo inserito o errore nell'inserimento
 		if(!processes_ok || processes_not_ok){
 			printf("\n");
-			if(!processes_ok) printf("\e[48;5;234mNo process has ben loaded. \e[0m");
-			if(processes_not_ok) printf("\e[48;5;234m%d processes have failed loading. \e[0m", processes_not_ok);
-			printf("\e[48;5;234mDo you want to try again? (\e[1;3my\e[22;23m for yes, \e[1;3mn\e[22;23m for no)\e[0m\n");
+			if(!processes_ok) print_message_e(9);
+			if(processes_not_ok) {
+				printEscape("48;5;234"); printf("%d processes have failed loading. ", processes_not_ok); printEscape("0");
+			}
+			print_message_e(10);
+			fflush(stdout);
 			int yn;
 			while(1){
 				changemode(1);
@@ -132,24 +208,27 @@ int main(int argc, char** argv) {
 
 				if(yn=='y') goto insert_filename;
 				else if(yn=='n'){
-					if(! &os.processes.size){
-						printf("\n%s\n", message_goodbye);
+					if(! os.processes.size){
+						printf("\n");
+						printPidList_AUX(&os.processes, "processes", -1);
+						printf("There are no processes.\n\n");
+						print_message_e(5);
 						return EXIT_SUCCESS;
 					}
 					break;
 				}
 				else{
-					printf("%s", message_invalid);
+					print_message_e(4);
 					continue;
 				}
 			}
 		}
 		printf("\n");
 		printPidList_AUX(&os.processes, "processes", -1);
-		printf("\n");
 
 		// Nuovi inserimenti
-		printf("\e[48;5;234mDo you want to load more processes? (\e[1;3my\e[22;23m for yes, \e[1;3mn\e[22;23m for no)\e[0m\n");
+		print_message_e(11);
+		fflush(stdout);
 		int yn;
 		while(1){
 			changemode(1);
@@ -162,13 +241,13 @@ int main(int argc, char** argv) {
 				break;
 			}
 			else{
-				printf("%s", message_invalid);
+				print_message_e(4);
 				continue;
 			}
 		}
 
 		// Inserimento numero di core
-		int core = gets_core(16, "Insert number of available CPUs:");
+		int core = gets_core();
 		srr_args.core = core;
 		printf("\nNumber of CPUs: %d\n", core);
 
@@ -176,7 +255,7 @@ int main(int argc, char** argv) {
 		char run = 1;
 		int steps;
 		while(run) {
-			steps = gets_steps(16, "How many steps do you want to go forward? (\e[1;3m0\e[22;23m or \e[1;3mall\e[22;23m for skip to end, \e[1;3mENTER\e[22;23m for one step, \e[1;3mq\e[22;23m for quit)");
+			steps = gets_steps();
 			if(steps==-1) break;
 			else if(steps==0){
 				while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) OS_simStep(&os);
@@ -197,14 +276,14 @@ int main(int argc, char** argv) {
 	}
 
 	else if(loading_mode=='i'){
-		printf("IN LINE\n");
+		print_message_e(7);
 	}
 
 
 
 
 
-	printf("\n%s\n", message_goodbye);
+	print_message_e(5);
 	return EXIT_SUCCESS;
 	// *** inserire controlli numero di argomenti
 

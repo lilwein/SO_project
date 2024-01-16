@@ -26,14 +26,16 @@ ListItem* List_find_process(ListHead* head, ListItem* item) {
   return 0;
 };
 
-int gets_core(int lenght, char* message){
+int gets_core(){
+	int lenght = 16;
 	char* string = (char*) malloc(lenght);
 	int number;
 	char ok = 1;
 	while(ok){
-		printf("\n\e[48;5;234m");
-		printf("%s", message);
-		printf("\e[0m ");
+		printf("\n"); printEscape("48;5;234"); printf("Insert number of available CPUs:");
+		printEscape("0"); printf(" ");
+		fflush(stdout);
+
 		fgets(string, lenght, stdin);
 		for(int i=0; i<strlen(string)-1; i++){
 			if(!isdigit(string[i])){
@@ -56,14 +58,21 @@ int gets_core(int lenght, char* message){
 	return number;
 };
 
-int gets_steps(int lenght, char* message){
+int gets_steps(){
+	int lenght = 16;
 	char* string = (char*) malloc(lenght);
 	int number;
 	char ok = 1;
 	while(ok){
-		printf("\n\e[48;5;234m");
-		printf("%s", message);
-		printf("\e[0m ");
+		printf("\n"); printEscape("48;5;234");
+		printf("How many steps do you want to go forward? (");
+		printEscape("1;3"); printf("0"); printEscape("22;23"); printf(" or ");
+		printEscape("1;3"); printf("all"); printEscape("22;23"); printf(" for skip to end, ");
+		printEscape("1;3"); printf("ENTER"); printEscape("22;23"); printf(" for one step, ");
+		printEscape("1;3"); printf("q"); printEscape("22;23"); printf(" for quit)");
+		printEscape("0"); printf(" ");
+		fflush(stdout);
+
 		fgets(string, lenght, stdin);
 		if(!strcmp(string, "all\n")) return 0;
 		if(!strcmp(string, "\n")) return 1;

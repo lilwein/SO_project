@@ -4,8 +4,8 @@
 
 ListItem* List_find_process(ListHead* head, ListItem* item);
 
-int gets_core(int lenght, char* message);
-int gets_steps(int lenght, char* message);
+int gets_core();
+int gets_steps();
 
 void printPidLists(OS* os);
 void printPidList_AUX(ListHead* head, char* name, int n);

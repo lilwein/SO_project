@@ -1,6 +1,7 @@
 CC=gcc
 CCOPTS=--std=gnu99 -Wall
 CCDEBUG= -D_LIST_DEBUG_ #-D_DEBUG #-D_DEBUG_SCHEDULER
+CCANSI= #-D_NO_ANSI
 
 OBJS=linked_list.o\
 	 process.o\
@@ -18,10 +19,10 @@ BINS= simulator
 all:	$(BINS)
 
 %.o:	%.c $(HEADERS)
-	$(CC) $(CCOPTS) $(CCDEBUG) -c -o $@  $<
+	$(CC) $(CCOPTS) $(CCDEBUG) $(CCANSI) -c -o $@  $<
 
 simulator:	simulator.c $(OBJS)
-	$(CC) $(CCOPTS) $(CCDEBUG) -o $@ $^ -lm
+	$(CC) $(CCOPTS) $(CCDEBUG) $(CCANSI) -o $@ $^ -lm
 
 clean:
 	rm -rf *.o *~ $(OBJS) $(BINS)
