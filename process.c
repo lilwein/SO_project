@@ -73,6 +73,36 @@ int Process_load_file(Process* p, const char* filename) {
 	return num_events;
 }
 
+void Process_init_inline(Process* p, int pid, int arrival){
+	p->pid = pid;
+	p->arrival_time = arrival;
+	
+	List_init(&p->events);
+	p->list.prev = 0;
+	p->list.next = 0;
+};
+
+void Process_load_inline(Process* p, int cpu_burst, int io_burst) {
+
+	ProcessEvent* e_CPU = (ProcessEvent*) malloc(sizeof(ProcessEvent));
+	e_CPU->list.prev = 0;
+	e_CPU->list.next = 0;
+	e_CPU->type = CPU;
+	e_CPU->duration = cpu_burst;
+	e_CPU->quantum = -1;
+	e_CPU->next_prediction = -1;
+	List_pushBack(&p->events, (ListItem*)e_CPU);
+
+	ProcessEvent* e_IO = (ProcessEvent*) malloc(sizeof(ProcessEvent));
+	e_IO->list.prev = 0;
+	e_IO->list.next = 0;
+	e_IO->type = IO;
+	e_IO->duration = io_burst;
+	e_IO->quantum = -1;
+	e_IO->next_prediction = -1;
+	List_pushBack(&p->events, (ListItem*)e_IO);
+};
+
 
 void Process_CalculatePrediction(Process* p, double decay){
 	

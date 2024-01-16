@@ -14,6 +14,8 @@
 #include "aux.h"
 #include "os.h"
 
+#define MAX_BUFFER 1024
+
 ListItem* List_find_process(ListHead* head, ListItem* item) {
 	ListItem* aux = head->first;
 	int pid_item = ((Process*) item)->pid;
@@ -26,14 +28,14 @@ ListItem* List_find_process(ListHead* head, ListItem* item) {
   return 0;
 };
 
-int gets_core(){
-	int lenght = 16;
-	char* string = (char*) malloc(lenght);
+int gets_int(int min, int max, char message){
+	int lenght = MAX_BUFFER;
+	char* string = (char*) malloc(lenght+1);
 	int number;
 	char ok = 1;
 	while(ok){
-		print_message_e(12);
-		fflush(stdout);
+		print_message_e(message);
+		// fflush(stdout);
 
 		fgets(string, lenght, stdin);
 		for(int i=0; i<strlen(string)-1; i++){
@@ -48,7 +50,7 @@ int gets_core(){
 			continue;
 		}
 		number = atoi(string);
-		if(number<1 || number>10){
+		if(number<min || number>=max){
 			printf("Invalid number, please try again\n");
 			continue;
 		}
@@ -58,20 +60,20 @@ int gets_core(){
 };
 
 double gets_decay(){
-	int lenght = 16;
+	int lenght = MAX_BUFFER;
 	char* string = (char*) malloc(lenght);
 	double number;
 	char ok = 1;
 	while(ok){
 		int dots = 0;
 		print_message_e(15);
-		fflush(stdout);
+		// fflush(stdout);
 
 		fgets(string, lenght, stdin);
 		if(!strcmp(string, "\n")) return 0.5;
 		for(int i=0; i<strlen(string)-1; i++){
 			if(string[i]=='.') dots++;
-			if(!isdigit(string[i]) && dots>1){
+			if(!isdigit(string[i]) && dots!=1){
 				printf("Invalid value, please insert a number\n");
 				ok = 0;
 				break;
@@ -92,7 +94,7 @@ double gets_decay(){
 };
 
 int gets_steps(){
-	int lenght = 16;
+	int lenght = MAX_BUFFER;
 	char* string = (char*) malloc(lenght);
 	int number;
 	char ok = 1;
@@ -123,41 +125,6 @@ int gets_steps(){
 		ok = 0;
 	} 
 	return number;
-};
-
-int gets_processes(){
-	// int lenght = 16;
-	// char* string = (char*) malloc(lenght);
-	// int number;
-	// char ok = 1;
-	// while(ok){
-	// 	print_message_e(13);
-	// 	fflush(stdout);
-
-	// 	fgets(string, lenght, stdin);
-	// 	if(!strcmp(string, "all\n")) return 0;
-	// 	if(!strcmp(string, "\n")) return 1;
-	// 	if(!strcmp(string, "q\n")) return -1;
-	// 	for(int i=0; i<strlen(string)-1; i++){
-	// 		if(!isdigit(string[i])){
-	// 			printf("Invalid value, please insert a number\n");
-	// 			ok = 0;
-	// 			break;
-	// 		}
-	// 	}
-	// 	if(!ok){
-	// 		ok = 1;
-	// 		continue;
-	// 	}
-	// 	number = atoi(string);
-	// 	if(number<0){
-	// 		printf("Invalid number, please try again\n");
-	// 		continue;
-	// 	}
-	// 	ok = 0;
-	// } 
-	// return number;
-	return 1;
 };
 
 void print_message_e(char type){
@@ -208,7 +175,7 @@ void print_message_e(char type){
 	}
 	else if(type==8){
 		// 8: insert processes
-		printEscape("48;5;234"); printf("Insert txt files contained in ");
+		printEscape("48;5;234"); printf("\nInsert txt files contained in ");
 		printEscape("3"); printf("processes"); printEscape("23");
 		printf(" folder (ex: p1 p2 p3):"); printEscape("0"); printf(" ");
 	}
@@ -255,7 +222,7 @@ void print_message_e(char type){
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
 		printf(" to continue (");
 		printEscape("1;3"); printf("q"); printEscape("22;23"); printf(" for quit)");
-		printEscape("0"); printf("\n\n");
+		printEscape("0"); printf("\n");
 	}
 	else if(type==15){
 		// 15: gets_decay
@@ -264,6 +231,24 @@ void print_message_e(char type){
 		printf("Insert a new value or press ");
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
 		printf(" to continue");
+		printEscape("0"); printf(" ");
+	}
+	else if(type==16){
+		// 16: insert pid
+		printf("\n"); printEscape("48;5;234");
+		printf("Insert pid (number) of the process:");
+		printEscape("0"); printf(" ");
+	}
+	else if(type==17){
+		// 16: insert cpu burst
+		printf("\n"); printEscape("48;5;234");
+		printf("Insert CPU BURST:");
+		printEscape("0"); printf(" ");
+	}
+	else if(type==18){
+		// 16: insert io burst
+		printf("\n"); printEscape("48;5;234");
+		printf("Insert IO BURST:");
 		printEscape("0"); printf(" ");
 	}
 	else assert(0 && "invalid argument");

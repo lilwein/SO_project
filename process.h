@@ -21,4 +21,7 @@ typedef struct {
 int Process_load_file(Process* p, const char* filename);
 int Process_save_file(const Process* p, const char* filename);
 
+void Process_init_inline(Process* p, int pid, int arrival);
+void Process_load_inline(Process* p, int cpu_burst, int io_burst);
+
 void Process_CalculatePrediction(Process* p, double decay);

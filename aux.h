@@ -4,7 +4,7 @@
 
 ListItem* List_find_process(ListHead* head, ListItem* item);
 
-int gets_core();
+int gets_int(int min, int max, char message);
 int gets_steps();
 double gets_decay();
 

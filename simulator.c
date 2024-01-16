@@ -49,14 +49,14 @@ int main(int argc, char** argv) {
 	else if(loading_mode=='i') print_message_e(7);
 
 	// Inserimento numero di core
-	int core = gets_core();
+	int core = gets_int(1, 16, 12);
 	srr_args.core = core;
 	printf("\nNumber of CPUs: %d\n", core);
 
 	// Inserimento decay coefficient
 	double decay = gets_decay();
 	// srr_args.core = core;
-	printf("\nDecay Coefficient: %.6f\n\n", decay);
+	printf("\nDecay Coefficient: %.6f\n", decay);
 
 
 
@@ -222,7 +222,27 @@ int main(int argc, char** argv) {
 				break;
 			}
 			else if(enter==' '){
+				int pid = gets_int(1, 9999, 16);
+				Process new_process;
+				int cpu_burst = gets_int(1, 9999, 17);
+				int io_burst = gets_int(1, 9999, 18);
+				Process_init_inline(&new_process, pid, 0);
+				Process_load_inline(&new_process, cpu_burst, io_burst);
 
+				// Calcolo dei quantum predtcion
+				Process_CalculatePrediction(&new_process, decay);
+
+				Process* new_process_ptr = (Process*)malloc(sizeof(Process));
+				*new_process_ptr = new_process;
+				if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
+					printf("\nProcess with pid (%d) is already loaded\n", new_process_ptr->pid);
+					continue;
+				}
+				else{
+					printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
+					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
+				}
+				
 			}
 			else if(enter=='q'){
 				print_message_e(5);
@@ -234,7 +254,8 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
-
+	printf("\n");
+	printPidList_AUX(&os.processes, "processes", -1);
 
 
 
