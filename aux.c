@@ -4,10 +4,24 @@
 #include <math.h>
 #include <unistd.h>
 
+#include <termios.h>
+#include <sys/types.h>
+#include <sys/time.h>
+
 #include "aux.h"
 #include "os.h"
 
-
+ListItem* List_find_process(ListHead* head, ListItem* item) {
+	ListItem* aux = head->first;
+	int pid_item = ((Process*) item)->pid;
+	while(aux){
+		Process* p = (Process*) aux;
+		if (p->pid==pid_item)
+			return item;
+		aux=aux->next;
+	}
+  return 0;
+};
 
 void setZeroUsed(ListHead* head){
 	ListItem* item = head->first;
@@ -46,6 +60,7 @@ void printPidLists(OS* os){
 	printPidList_AUX(&os->running, "running", -1);
 	printPidList_AUX(&os->ready, "ready   ", -1);
 	printPidList_AUX(&os->waiting, "waiting",-1);
+	// printPidList_AUX(&os->processes, "processes",-1);
 	printf("\n");
 };
 
@@ -75,4 +90,34 @@ void printEscape(char* str){
 		return;
 	#endif
 	printf("\e[%sm", str);
+}
+
+
+
+
+void changemode(int dir){
+  	static struct termios oldt, newt;
+
+  	if ( dir == 1 ){
+		tcgetattr( STDIN_FILENO, &oldt);
+		newt = oldt;
+		newt.c_lflag &= ~( ICANON | ECHO );
+		tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+	}
+	else
+		tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
+}
+
+int kbhit (void){
+	struct timeval tv;
+	fd_set rdfs;
+
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+
+	FD_ZERO(&rdfs);
+	FD_SET (STDIN_FILENO, &rdfs);
+
+	select(STDIN_FILENO+1, &rdfs, NULL, NULL, &tv);
+	return FD_ISSET(STDIN_FILENO, &rdfs);
 }
