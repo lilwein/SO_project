@@ -12,6 +12,12 @@
 OS os;
 
 int main(int argc, char** argv) {
+	// Inizializzazione OS
+	OS_init(&os);
+	scheduler_args srr_args;
+	os.schedule_args = &srr_args;
+	os.schedule_fn = schedulerSJF;
+
 	print_message_e(1);
 	print_message_e(2);
 
@@ -39,17 +45,23 @@ int main(int argc, char** argv) {
 			continue;
 		}
 	}
+	if(loading_mode=='f') print_message_e(6);
+	else if(loading_mode=='i') print_message_e(7);
 
-	// Inserimento via file
+	// Inserimento numero di core
+	int core = gets_core();
+	srr_args.core = core;
+	printf("\nNumber of CPUs: %d\n", core);
+
+	// Inserimento decay coefficient
+	double decay = gets_decay();
+	// srr_args.core = core;
+	printf("\nDecay Coefficient: %.6f\n\n", decay);
+
+
+
+	// INSERIMENTO VIA FILE
 	if(loading_mode=='f'){
-		print_message_e(6);
-		
-		// Inizializzazione OS
-		OS_init(&os);
-		scheduler_args srr_args;
-		os.schedule_args = &srr_args;
-		os.schedule_fn = schedulerSJF;
-
 		// Inserimento filename
 		insert_filename: ;
 		char* files = (char*) malloc(MAX_SIZE_STRING);
@@ -88,7 +100,7 @@ int main(int argc, char** argv) {
 			processes_ok ++;
 			
 			// Calcolo dei quantum predtcion
-			Process_CalculatePrediction(&new_process);
+			Process_CalculatePrediction(&new_process, decay);
 
 			// Se ci sono eventi, inserimento del processo nella lista dei processi
 			if (num_events) {
@@ -166,11 +178,6 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		// Inserimento numero di core
-		int core = gets_core();
-		srr_args.core = core;
-		printf("\nNumber of CPUs: %d\n", core);
-
 		// START
 		char run = 1;
 		int steps;
@@ -195,8 +202,37 @@ int main(int argc, char** argv) {
 		// STOP
 	}
 
+
+
+	// INSERIMENTO IN LINE
 	else if(loading_mode=='i'){
-		print_message_e(7);
+
+		// ****
+		int enter;
+		while(1){
+			print_message_e(14);
+			fflush(stdout);
+
+			changemode(1);
+			while(!kbhit()){}
+			enter = getchar();
+			changemode(0);
+
+			if(enter=='\n'){
+				break;
+			}
+			else if(enter==' '){
+
+			}
+			else if(enter=='q'){
+				print_message_e(5);
+				return EXIT_SUCCESS;
+			}
+			else{
+				print_message_e(4);
+				continue;
+			}
+		}
 	}
 
 
@@ -207,30 +243,30 @@ int main(int argc, char** argv) {
 	return EXIT_SUCCESS;
 	// *** inserire controlli numero di argomenti
 
-	int core = atoi(argv[1]);
+	// int core = atoi(argv[1]);
 	
-	OS_init(&os);
-	scheduler_args srr_args;
-	srr_args.core = core;
-	os.schedule_args = &srr_args;
-	os.schedule_fn = schedulerSJF;
+	// OS_init(&os);
+	// scheduler_args srr_args;
+	// srr_args.core = core;
+	// os.schedule_args = &srr_args;
+	// os.schedule_fn = schedulerSJF;
 	
 	
 
-	for (int i=2; i<argc; ++i){
-		Process new_process;
-		int num_events = Process_load_file(&new_process, argv[i]);
-		Process_CalculatePrediction(&new_process);
+	// for (int i=2; i<argc; ++i){
+	// 	Process new_process;
+	// 	int num_events = Process_load_file(&new_process, argv[i]);
+	// 	Process_CalculatePrediction(&new_process);
 
-		printf("loading [%s], pid: %d, events:%d", argv[i], new_process.pid, num_events);
-		if (num_events) {
-			Process* new_process_ptr = (Process*)malloc(sizeof(Process));
-			*new_process_ptr = new_process;
-			List_pushBack(&os.processes, (ListItem*)new_process_ptr); // inserisce alla fine
-		}
-	}
-	printf("num processes in queue %d\n", os.processes.size);
-	while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) {
-		OS_simStep(&os);
-	}
+	// 	printf("loading [%s], pid: %d, events:%d", argv[i], new_process.pid, num_events);
+	// 	if (num_events) {
+	// 		Process* new_process_ptr = (Process*)malloc(sizeof(Process));
+	// 		*new_process_ptr = new_process;
+	// 		List_pushBack(&os.processes, (ListItem*)new_process_ptr); // inserisce alla fine
+	// 	}
+	// }
+	// printf("num processes in queue %d\n", os.processes.size);
+	// while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) {
+	// 	OS_simStep(&os);
+	// }
 }

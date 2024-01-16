@@ -6,8 +6,6 @@
 
 #define LINE_LENGTH 1024
 
-#define DECAY_COEFF 0.5
-
 int Process_load_file(Process* p, const char* filename) {
 	
 	FILE* f = fopen(filename, "r");
@@ -76,7 +74,7 @@ int Process_load_file(Process* p, const char* filename) {
 }
 
 
-void Process_CalculatePrediction(Process* p){
+void Process_CalculatePrediction(Process* p, double decay){
 	
 	ListItem* aux = p->events.first;
 	int quantum_pred;
@@ -92,7 +90,7 @@ void Process_CalculatePrediction(Process* p){
 		if(first_event) e->quantum = e->duration;
 		else e->quantum = quantum_pred;
 
-		double qp = e->duration * DECAY_COEFF + e->quantum * (1-DECAY_COEFF);
+		double qp = e->duration * decay + e->quantum * (1-decay);
 		quantum_pred = round(qp);
 		e->next_prediction = quantum_pred;
 

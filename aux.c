@@ -57,6 +57,40 @@ int gets_core(){
 	return number;
 };
 
+double gets_decay(){
+	int lenght = 16;
+	char* string = (char*) malloc(lenght);
+	double number;
+	char ok = 1;
+	while(ok){
+		int dots = 0;
+		print_message_e(15);
+		fflush(stdout);
+
+		fgets(string, lenght, stdin);
+		if(!strcmp(string, "\n")) return 0.5;
+		for(int i=0; i<strlen(string)-1; i++){
+			if(string[i]=='.') dots++;
+			if(!isdigit(string[i]) && dots>1){
+				printf("Invalid value, please insert a number\n");
+				ok = 0;
+				break;
+			}
+		}
+		if(!ok){
+			ok = 1;
+			continue;
+		}
+		number = strtod(string, NULL);
+		if(number<0 || number>1){
+			printf("Invalid number, please try again\n");
+			continue;
+		}
+		ok = 0;
+	}
+	return number;
+};
+
 int gets_steps(){
 	int lenght = 16;
 	char* string = (char*) malloc(lenght);
@@ -91,6 +125,41 @@ int gets_steps(){
 	return number;
 };
 
+int gets_processes(){
+	// int lenght = 16;
+	// char* string = (char*) malloc(lenght);
+	// int number;
+	// char ok = 1;
+	// while(ok){
+	// 	print_message_e(13);
+	// 	fflush(stdout);
+
+	// 	fgets(string, lenght, stdin);
+	// 	if(!strcmp(string, "all\n")) return 0;
+	// 	if(!strcmp(string, "\n")) return 1;
+	// 	if(!strcmp(string, "q\n")) return -1;
+	// 	for(int i=0; i<strlen(string)-1; i++){
+	// 		if(!isdigit(string[i])){
+	// 			printf("Invalid value, please insert a number\n");
+	// 			ok = 0;
+	// 			break;
+	// 		}
+	// 	}
+	// 	if(!ok){
+	// 		ok = 1;
+	// 		continue;
+	// 	}
+	// 	number = atoi(string);
+	// 	if(number<0){
+	// 		printf("Invalid number, please try again\n");
+	// 		continue;
+	// 	}
+	// 	ok = 0;
+	// } 
+	// return number;
+	return 1;
+};
+
 void print_message_e(char type){
 	if(type==1){
 		// 1: welcome
@@ -107,7 +176,8 @@ void print_message_e(char type){
 		printEscape("48;5;234"); printf("%s", message_1); printEscape("1;3"); printf("f"); printEscape("22;23"); printf("%s", message_2); 
 		printEscape("1;3"); printf("i"); printEscape("22;23"); printf("%s", message_3); 
 		printEscape("1;3"); printf("h"); printEscape("22;23"); printf("%s", message_4); 
-		printEscape("1;3"); printf("q"); printEscape("22;23"); printf("%s", message_5); printEscape("0"); printf("\n\n");
+		printEscape("1;3"); printf("q"); printEscape("22;23"); printf("%s", message_5);
+		printEscape("0"); printf("\n\n");
 	}
 	else if(type==3){
 		// 3: help
@@ -168,13 +238,32 @@ void print_message_e(char type){
 		printEscape("0"); printf(" ");
 	}
 	else if(type==13){
-		// 12: get_steps
+		// 13: get_steps
 		printf("\n"); printEscape("48;5;234");
 		printf("How many steps do you want to go forward? (");
 		printEscape("1;3"); printf("0"); printEscape("22;23"); printf(" or ");
 		printEscape("1;3"); printf("all"); printEscape("22;23"); printf(" for skip to end, ");
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23"); printf(" for one step, ");
 		printEscape("1;3"); printf("q"); printEscape("22;23"); printf(" for quit)");
+		printEscape("0"); printf(" ");
+	}
+	else if(type==14){
+		// 14: inserimento processo
+		printf("\n"); printEscape("48;5;234"); printf("Press ");
+		printEscape("1;3"); printf("SPACE"); printEscape("22;23");
+		printf(" to create a new process or ");
+		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
+		printf(" to continue (");
+		printEscape("1;3"); printf("q"); printEscape("22;23"); printf(" for quit)");
+		printEscape("0"); printf("\n\n");
+	}
+	else if(type==15){
+		// 15: gets_decay
+		printf("\n"); printEscape("48;5;234");
+		printf("Decay Coefficient ( 0 <= x <= 1 ) is set on 0.5. ");
+		printf("Insert a new value or press ");
+		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
+		printf(" to continue");
 		printEscape("0"); printf(" ");
 	}
 	else assert(0 && "invalid argument");

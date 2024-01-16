@@ -6,6 +6,7 @@ ListItem* List_find_process(ListHead* head, ListItem* item);
 
 int gets_core();
 int gets_steps();
+double gets_decay();
 
 void print_message_e(char type);
 

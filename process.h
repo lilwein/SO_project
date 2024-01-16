@@ -21,4 +21,4 @@ typedef struct {
 int Process_load_file(Process* p, const char* filename);
 int Process_save_file(const Process* p, const char* filename);
 
-void Process_CalculatePrediction(Process* p);
+void Process_CalculatePrediction(Process* p, double decay);
