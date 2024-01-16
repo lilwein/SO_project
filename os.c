@@ -76,9 +76,6 @@ void OS_createProcess(OS* os, Process* p) {
 
 
 void OS_simStep(OS* os){
-	// printf("\e[5mMd.Mehedi hasan\e[m");
-	// printf("\x1b[2;37;41mWorld");
-	// printf("\e[1;31maaaaaaaaaa\e[0m");
 
 	printEscape("7;1;8"); printf("\n*************************"); printEscape("28");
 	printf("TIME: %08d", os->timer);
