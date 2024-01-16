@@ -218,7 +218,7 @@ void print_message_e(char type){
 		// 14: inserimento processo
 		printf("\n"); printEscape("48;5;234"); printf("Press ");
 		printEscape("1;3"); printf("SPACE"); printEscape("22;23");
-		printf(" to create a new process or ");
+		printf(" to create a new process (or add events) ");
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
 		printf(" to continue (");
 		printEscape("1;3"); printf("q"); printEscape("22;23"); printf(" for quit)");
@@ -236,18 +236,18 @@ void print_message_e(char type){
 	else if(type==16){
 		// 16: insert pid
 		printf("\n"); printEscape("48;5;234");
-		printf("Insert pid (number) of the process:");
+		printf("Insert pid (number) of the process to which the events are added (process will be created if it doesn't exist):");
 		printEscape("0"); printf(" ");
 	}
 	else if(type==17){
 		// 16: insert cpu burst
-		printf("\n"); printEscape("48;5;234");
+		printEscape("48;5;234");
 		printf("Insert CPU BURST:");
 		printEscape("0"); printf(" ");
 	}
 	else if(type==18){
 		// 16: insert io burst
-		printf("\n"); printEscape("48;5;234");
+		printEscape("48;5;234");
 		printf("Insert IO BURST:");
 		printEscape("0"); printf(" ");
 	}
@@ -293,7 +293,7 @@ void printPidLists(OS* os){
 	printPidList_AUX(&os->running, "running", -1);
 	printPidList_AUX(&os->ready, "ready   ", -1);
 	printPidList_AUX(&os->waiting, "waiting",-1);
-	// printPidList_AUX(&os->processes, "processes",-1);
+	printPidList_AUX(&os->processes, "processes",-1);
 	printf("\n");
 };
 

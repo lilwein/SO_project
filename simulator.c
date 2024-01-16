@@ -12,6 +12,8 @@
 OS os;
 
 int main(int argc, char** argv) {
+	system("clear");
+
 	// Inizializzazione OS
 	OS_init(&os);
 	scheduler_args srr_args;
@@ -224,24 +226,38 @@ int main(int argc, char** argv) {
 			else if(enter==' '){
 				int pid = gets_int(1, 9999, 16);
 				Process new_process;
+				Process_init_inline(&new_process, pid, 0);
+
+				Process* new_process_ptr = (Process*)malloc(sizeof(Process));
+				*new_process_ptr = new_process;
+
+				if( List_find_process(&os.processes, (ListItem*)new_process_ptr) || 
+					List_find_process(&os.ready, (ListItem*)new_process_ptr) || 
+					List_find_process(&os.waiting, (ListItem*)new_process_ptr) || 
+					List_find_process(&os.running, (ListItem*)new_process_ptr)
+				){
+					printf("\nProcess with pid (%d) exists\n", new_process_ptr->pid);
+				}
+
+
 				int cpu_burst = gets_int(1, 9999, 17);
 				int io_burst = gets_int(1, 9999, 18);
-				Process_init_inline(&new_process, pid, 0);
+				
 				Process_load_inline(&new_process, cpu_burst, io_burst);
 
 				// Calcolo dei quantum predtcion
 				Process_CalculatePrediction(&new_process, decay);
 
-				Process* new_process_ptr = (Process*)malloc(sizeof(Process));
-				*new_process_ptr = new_process;
-				if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
-					printf("\nProcess with pid (%d) is already loaded\n", new_process_ptr->pid);
-					continue;
-				}
-				else{
+				
+				// if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
+				// 	printf("\nProcess with pid (%d) is already loaded\n", new_process_ptr->pid);
+				// 	continue;
+				// }
+				// else{
 					printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
 					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
-				}
+				// }
+				printPidLists(&os);
 				
 			}
 			else if(enter=='q'){
@@ -254,6 +270,31 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
+	// START
+	// char run = 1;
+	// int steps;
+	// while(run && OS_run(&os) ) {
+	// 	steps = gets_steps();
+	// 	if(steps==-1) break;
+	// 	else if(steps==0){
+	// 		while(OS_run(&os)) OS_simStep(&os);
+	// 		run = 0;
+	// 		break;
+	// 	}
+	// 	else {
+	// 		for(int i=0; i<steps; i++){
+	// 			if(!OS_run(&os)){
+	// 				run = 0;
+	// 				break;
+	// 			}
+	// 			OS_simStep(&os);
+	// 		}
+	// 	}
+	// }
+	// STOP
+
+
+
 	printf("\n");
 	printPidList_AUX(&os.processes, "processes", -1);
 
