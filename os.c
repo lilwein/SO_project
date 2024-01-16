@@ -334,6 +334,10 @@ void OS_simStep(OS* os){
 	// sleep(1);
 }
 
+int OS_run(OS* os){
+	return os->running.first || os->ready.first || os->waiting.first || os->processes.first;
+}
+
 void OS_destroy(OS* os) {
 }
 

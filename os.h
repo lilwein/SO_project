@@ -31,3 +31,5 @@ typedef struct {
 void OS_init(OS* os);
 void OS_simStep(OS* os);
 void OS_destroy(OS* os);
+
+int OS_run(OS* os);

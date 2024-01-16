@@ -174,17 +174,17 @@ int main(int argc, char** argv) {
 		// START
 		char run = 1;
 		int steps;
-		while(run) {
+		while(run && OS_run(&os) ) {
 			steps = gets_steps();
 			if(steps==-1) break;
 			else if(steps==0){
-				while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) OS_simStep(&os);
+				while(OS_run(&os)) OS_simStep(&os);
 				run = 0;
 				break;
 			}
 			else {
 				for(int i=0; i<steps; i++){
-					if(!(os.running.first || os.ready.first || os.waiting.first || os.processes.first)){
+					if(!OS_run(&os)){
 						run = 0;
 						break;
 					}
