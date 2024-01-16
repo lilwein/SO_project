@@ -239,7 +239,7 @@ int main(int argc, char** argv) {
 					continue;
 				}
 				else{
-					printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
+					printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
 					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
 				}
 				
