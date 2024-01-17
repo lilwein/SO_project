@@ -16,16 +16,15 @@
 
 #define MAX_BUFFER 1024
 
-ListItem* List_find_process(ListHead* head, ListItem* item) {
+ListItem* List_find_process(ListHead* head, int pid) {
 	ListItem* aux = head->first;
-	int pid_item = ((Process*) item)->pid;
 	while(aux){
 		Process* p = (Process*) aux;
-		if (p->pid==pid_item)
-			return item;
+		if (p->pid==pid)
+			return aux;
 		aux=aux->next;
 	}
-  return 0;
+  return NULL;
 };
 
 int gets_int(int min, int max, char message){

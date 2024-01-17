@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 #include "process.h"
 
 #define LINE_LENGTH 1024
@@ -82,7 +83,7 @@ void Process_init_inline(Process* p, int pid, int arrival){
 	p->list.next = 0;
 };
 
-void Process_load_inline(Process* p, int cpu_burst, int io_burst) {
+ProcessEvent* Process_load_inline(Process* p, int cpu_burst, int io_burst) {
 
 	ProcessEvent* e_CPU = (ProcessEvent*) malloc(sizeof(ProcessEvent));
 	e_CPU->list.prev = 0;
@@ -101,15 +102,24 @@ void Process_load_inline(Process* p, int cpu_burst, int io_burst) {
 	e_IO->quantum = -1;
 	e_IO->next_prediction = -1;
 	List_pushBack(&p->events, (ListItem*)e_IO);
+
+	return e_CPU;
 };
 
-
-void Process_CalculatePrediction(Process* p, double decay){
+void Process_CalculatePrediction(Process* p, double decay, ProcessEvent* start){
 	
-	ListItem* aux = p->events.first;
 	int quantum_pred;
-	
 	char first_event = 1;
+
+	ListItem* aux = p->events.first;
+	
+	if(start && List_find(&p->events, (ListItem*)start) ){
+		while(aux && (ProcessEvent*)aux != start ) aux = aux->next;
+		if(aux->prev){
+			quantum_pred = ((ProcessEvent*) aux->prev)->next_prediction;
+			first_event = 0;
+		}
+	}
 
 	while(aux){
 		ProcessEvent* e = (ProcessEvent*) aux;
@@ -136,7 +146,14 @@ void Process_CalculatePrediction(Process* p, double decay){
 
 int Process_save_file(const Process* p, const char* filename){
 	
-	FILE* f = fopen(filename, "w");
+	char* path = "./output/";
+	char* extension = ".txt";
+	char* name = (char*) malloc(strlen(path)+strlen(extension)+5);
+	strcat(name, path);
+	strcat(name, filename);
+	strcat(name, extension);
+
+	FILE* f = fopen(name, "w");
 	if (!f) return -1;
 
 	fprintf(f, "PROCESS %d %d\n", p->pid, p->arrival_time);

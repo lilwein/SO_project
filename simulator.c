@@ -102,13 +102,13 @@ int main(int argc, char** argv) {
 			processes_ok ++;
 			
 			// Calcolo dei quantum predtcion
-			Process_CalculatePrediction(&new_process, decay);
+			Process_CalculatePrediction(&new_process, decay, NULL);
 
 			// Se ci sono eventi, inserimento del processo nella lista dei processi
 			if (num_events) {
 				Process* new_process_ptr = (Process*)malloc(sizeof(Process));
 				*new_process_ptr = new_process;
-				if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
+				if(List_find_process(&os.processes, new_process_ptr->pid)){
 					printf("Process with pid (%d) is already loaded\n", new_process_ptr->pid);
 					processes_ok --;
 				}
@@ -225,39 +225,69 @@ int main(int argc, char** argv) {
 			}
 			else if(enter==' '){
 				int pid = gets_int(1, 9999, 16);
-				Process new_process;
-				Process_init_inline(&new_process, pid, 0);
+				
+				ListItem* aux = List_find_process(&os.processes, pid);
+				if(!aux) aux = List_find_process(&os.ready, pid);
+				if(!aux) aux = List_find_process(&os.waiting, pid);
+				if(!aux) aux = List_find_process(&os.running, pid);
+				if(!aux){
+					// Processo non esistente: creare nuovo processo
+					Process new_process;
+					Process_init_inline(&new_process, pid, 0);
+					Process* new_process_ptr = (Process*)malloc(sizeof(Process));
+					*new_process_ptr = new_process;
 
-				Process* new_process_ptr = (Process*)malloc(sizeof(Process));
-				*new_process_ptr = new_process;
+					int cpu_burst = gets_int(1, 9999, 17);
+					int io_burst = gets_int(1, 9999, 18);
+					
+					Process_load_inline(new_process_ptr, cpu_burst, io_burst);
 
-				if( List_find_process(&os.processes, (ListItem*)new_process_ptr) || 
-					List_find_process(&os.ready, (ListItem*)new_process_ptr) || 
-					List_find_process(&os.waiting, (ListItem*)new_process_ptr) || 
-					List_find_process(&os.running, (ListItem*)new_process_ptr)
-				){
-					printf("\nProcess with pid (%d) exists\n", new_process_ptr->pid);
+					// Calcolo dei quantum predtcion
+					Process_CalculatePrediction(new_process_ptr, decay, NULL);
+
+					printf("\nLoading new process with pid: %d, arrival time: %d\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
+					printf("\nProcess with pid (%d) has %d events\n", new_process_ptr->pid, new_process_ptr->events.size);
+					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
 				}
 
+				else {
+					// Processo esistente
+					Process* existing_process = (Process*) aux;
 
-				int cpu_burst = gets_int(1, 9999, 17);
-				int io_burst = gets_int(1, 9999, 18);
+					int cpu_burst = gets_int(1, 9999, 17);
+					int io_burst = gets_int(1, 9999, 18);
+							
+					ProcessEvent* new_event = Process_load_inline(existing_process, cpu_burst, io_burst);
+
+					// Calcolo dei quantum predtcion
+					Process_CalculatePrediction(existing_process, decay, new_event);
+					printf("\nProcess with pid: %d already exists\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", existing_process->pid, cpu_burst, io_burst);
+					printf("\nProcess with pid (%d) has %d events\n", existing_process->pid, existing_process->events.size);
+					char pid_str[5];
+					sprintf(pid_str, "%d", pid);
+					// Process_save_file(existing_process, pid_str);
+				}
 				
-				Process_load_inline(&new_process, cpu_burst, io_burst);
 
-				// Calcolo dei quantum predtcion
-				Process_CalculatePrediction(&new_process, decay);
+
+				// int cpu_burst = gets_int(1, 9999, 17);
+				// int io_burst = gets_int(1, 9999, 18);
+				
+				// Process_load_inline(&new_process, cpu_burst, io_burst);
+
+				// // Calcolo dei quantum predtcion
+				// Process_CalculatePrediction(&new_process, decay);
 
 				
-				// if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
-				// 	printf("\nProcess with pid (%d) is already loaded\n", new_process_ptr->pid);
-				// 	continue;
-				// }
-				// else{
-					printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
-					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
-				// }
-				printPidLists(&os);
+				// // if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
+				// // 	printf("\nProcess with pid (%d) is already loaded\n", new_process_ptr->pid);
+				// // 	continue;
+				// // }
+				// // else{
+				// 	printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
+				// 	List_pushBack(&os.processes, (ListItem*)new_process_ptr);
+				// // }
+				// printPidLists(&os);
 				
 			}
 			else if(enter=='q'){

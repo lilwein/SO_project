@@ -2,7 +2,7 @@
 #include "linked_list.h"
 #include "os.h"
 
-ListItem* List_find_process(ListHead* head, ListItem* item);
+ListItem* List_find_process(ListHead* head, int pid);
 
 int gets_int(int min, int max, char message);
 int gets_steps();
