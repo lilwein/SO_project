@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <unistd.h>
 #include "os.h"
 #include "aux.h"
 
 #define MAX_PROCESSES 1024
 
-int stampa = 0;
+char stampa = 1;
 
 void OS_init(OS* os) {
 	List_init(&os->running);
@@ -75,7 +76,8 @@ void OS_createProcess(OS* os, Process* p) {
 
 
 
-void OS_simStep(OS* os){
+void OS_simStep(OS* os, int* timer){
+	*timer = os->timer;
 
 	printEscape("7;1;8"); printf("\n*************************"); printEscape("28");
 	printf("TIME: %08d", os->timer);
@@ -114,6 +116,9 @@ void OS_simStep(OS* os){
 	int runProcessTime = 0;
 	int* runPids = (int*) malloc(core*sizeof(int));
 
+	// Stampa liste
+	// if(stampa)printPidLists(os);
+
 	// RIPETERE PER OGNI CORE
 	for(int i=0; i<core; i++){
 		printf("----------------------------------------------------------------\n");
@@ -143,7 +148,7 @@ void OS_simStep(OS* os){
 		}
 
 		// Stampa liste
-		if(stampa)printPidLists(os);
+		// if(stampa)printPidLists(os);
 
 		#ifdef _DEBUG
 			printPidListsDebug(os, 2);
@@ -184,8 +189,13 @@ void OS_simStep(OS* os){
 			assert(e->type==IO);
 			
 			// E' passata un'epoca: decremento della durata rimanente
+			// Process_save_file(pcb, "1");
 			e->duration -- ;
 			printf("\t\t\tremaining time: %d\n",e->duration);
+
+			#ifdef _DEBUG
+				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+			#endif
 			
 			// Se l'IO BURST non è terminato, si passa al prossimo processo
 			// Se l'IO BURST è terminato,
@@ -201,7 +211,8 @@ void OS_simStep(OS* os){
 				
 				// Eventi finiti: kill process
 				if (! pcb->events.first) {
-					printf("\t\t\tend process (%d)\n", pcb->pid);
+					printf("\t\t\t"); printEscape("1;41"); printf("end process "); printEscape("3");
+					printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
 					free(pcb);
 				}
 				// Ci sono ancora eventi di tipo CPU o IO
@@ -263,8 +274,13 @@ void OS_simStep(OS* os){
 			assert(e->type==CPU);
 
 			// E' passata un'epoca: decremento della durata rimanente
+			// Process_save_file(pcb, "1");
 			e->duration --;
 			printf("\t\t\tremaining time: %d\n",e->duration);
+
+			#ifdef _DEBUG
+				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+			#endif
 
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
 			// Se il CPU BURST è terminato,
@@ -280,7 +296,8 @@ void OS_simStep(OS* os){
 
 				// Eventi finiti: kill process
 				if (! pcb->events.first) {
-					printf("\t\t\tend process (%d)\n", pcb->pid);
+					printf("\t\t\t"); printEscape("1;41"); printf("end process "); printEscape("3");
+					printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
 					free(pcb);
 				}
 				// Ci sono ancora eventi di tipo CPU o IO
@@ -305,9 +322,6 @@ void OS_simStep(OS* os){
 				SOLO UN processo alla volta può essere runnato da un core. */
 			break;
 		}
-		
-		// Stampa liste
-		if(stampa)printPidLists(os);
 
 		#ifdef _DEBUG
 			printPidListsDebug(os, 6);
@@ -323,6 +337,10 @@ void OS_simStep(OS* os){
 	}
 	printf("\n----------------------------------------------------------------\n");
 
+	// Stampa liste
+	if(stampa)printPidLists(os);
+	printf("----------------------------------------------------------------\n");
+
 	// Come anticipato prima, si devono ripristinare i valori di usedThisTime a 0 per tutti i processi.
 	setZeroUsed(&os->running);
 	setZeroUsed(&os->waiting);
@@ -330,6 +348,7 @@ void OS_simStep(OS* os){
 
 	// Incremento timer del nostro sistema operativo
 	++os->timer;
+	*timer = os->timer;
 
 	// sleep(1);
 }

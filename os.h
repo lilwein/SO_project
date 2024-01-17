@@ -29,7 +29,7 @@ typedef struct {
 } scheduler_args;
 
 void OS_init(OS* os);
-void OS_simStep(OS* os);
+void OS_simStep(OS* os, int* timer);
 void OS_destroy(OS* os);
 
 int OS_run(OS* os);

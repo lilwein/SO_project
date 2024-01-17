@@ -105,6 +105,7 @@ int gets_steps(){
 		if(!strcmp(string, "all\n")) return 0;
 		if(!strcmp(string, "\n")) return 1;
 		if(!strcmp(string, "q\n")) return -1;
+		if(!strcmp(string, "n\n") || !strcmp(string, "p\n")) return -2;
 		for(int i=0; i<strlen(string)-1; i++){
 			if(!isdigit(string[i])){
 				printf("Invalid value, please insert a number\n");
@@ -190,14 +191,6 @@ void print_message_e(char type){
 		printEscape("1;3"); printf("n"); printEscape("22;23"); printf(" for no)"); printEscape("0");
 		printf("\n");
 	}
-	else if(type==11){
-		// 11: nuovi processi
-		char* message = "Do you want to load more processes? (";
-		printf("\n"); printEscape("48;5;234"); printf("%s", message);
-		printEscape("1;3"); printf("y"); printEscape("22;23"); printf(" for yes, ");
-		printEscape("1;3"); printf("n"); printEscape("22;23"); printf(" for no)"); printEscape("0");
-		printf("\n");
-	}
 	else if(type==12){
 		// 12: get_core
 		printf("\n"); printEscape("48;5;234"); printf("Insert number of available CPUs:");
@@ -205,8 +198,17 @@ void print_message_e(char type){
 	}
 	else if(type==13){
 		// 13: get_steps
-		printf("\n"); printEscape("48;5;234");
-		printf("How many steps do you want to go forward? (");
+		printf("\n"); printEscape("48;5;234"); printf("Press ");
+		printEscape("1;3"); printf("n"); printEscape("22;23");
+		printf(" or ");
+		printEscape("1;3"); printf("p"); printEscape("22;23");
+		printf(" to CREATE a new process to or ADD events to a ");
+		printEscape("4"); printf("running"); printEscape("24");
+		printf(" or ");
+		printEscape("4"); printf("ready"); printEscape("24");
+		printf(" process."); printEscape("0"); printf("\n");
+		printEscape("48;5;234");
+		printf("Otherwise, TYPE how many steps you want to go forward (");
 		printEscape("1;3"); printf("0"); printEscape("22;23"); printf(" or ");
 		printEscape("1;3"); printf("all"); printEscape("22;23"); printf(" for skip to end, ");
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23"); printf(" for one step, ");
@@ -214,13 +216,13 @@ void print_message_e(char type){
 		printEscape("0"); printf(" ");
 	}
 	else if(type==14){
-		// 14: inserimento processo
-		printf("\n"); printEscape("48;5;234"); printf("Press ");
-		printEscape("1;3"); printf("SPACE"); printEscape("22;23");
-		printf(" to create a new process (or add events) ");
-		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
-		printf(" to continue (");
-		printEscape("1;3"); printf("q"); printEscape("22;23"); printf(" for quit)");
+		// 14: avviso: aggiungere eventi solo ai processi ready o running
+		printf("\n"); printEscape("4;48;5;234");
+		printf("Please add events ONLY to ");
+		printEscape("1;3"); printf("running"); printEscape("22;23");
+		printf(" or ");
+		printEscape("1;3"); printf("ready"); printEscape("22;23");
+		printf(" process.");
 		printEscape("0"); printf("\n");
 	}
 	else if(type==15){
@@ -235,7 +237,9 @@ void print_message_e(char type){
 	else if(type==16){
 		// 16: insert pid
 		printf("\n"); printEscape("48;5;234");
-		printf("Insert pid (number) of the process to which the events are added (process will be created if it doesn't exist):");
+		printf("Insert pid (number) of the process to which the events are added (process will be created if it doesn't exist), or type ");
+		printEscape("1;3"); printf("0"); printEscape("22;23");
+		printf(" to cancel:");
 		printEscape("0"); printf(" ");
 	}
 	else if(type==17){
@@ -292,8 +296,7 @@ void printPidLists(OS* os){
 	printPidList_AUX(&os->running, "running", -1);
 	printPidList_AUX(&os->ready, "ready   ", -1);
 	printPidList_AUX(&os->waiting, "waiting",-1);
-	printPidList_AUX(&os->processes, "processes",-1);
-	printf("\n");
+	// printPidList_AUX(&os->processes, "processes",-1);
 };
 
 int printUsed_AUX(ListHead* head){

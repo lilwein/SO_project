@@ -69,6 +69,8 @@ void schedulerSJF(OS* os, void* args_){
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
 	assert(e->type==CPU);
 
+	// printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+
 	/* Se la durata dell'evento supera quella del quantum prediction, si deve dividere l'evento in due eventi.
 		Il primo evento, qe, viene creato e differisce da quello originale poichè la sua durata equivale al
 		quantum prediction. Il secondo evento, che segue l'evento qe creato, è l'evento originale stesso ma con 

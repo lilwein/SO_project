@@ -9,7 +9,13 @@
 
 #define MAX_SIZE_STRING 1024
 
+int enterInLine();
+
 OS os;
+int timer = 0;
+
+int core;
+double decay;
 
 int main(int argc, char** argv) {
 	system("clear");
@@ -51,12 +57,12 @@ int main(int argc, char** argv) {
 	else if(loading_mode=='i') print_message_e(7);
 
 	// Inserimento numero di core
-	int core = gets_int(1, 16, 12);
+	core = gets_int(1, 16, 12);
 	srr_args.core = core;
 	printf("\nNumber of CPUs: %d\n", core);
 
 	// Inserimento decay coefficient
-	double decay = gets_decay();
+	decay = gets_decay();
 	// srr_args.core = core;
 	printf("\nDecay Coefficient: %.6f\n", decay);
 
@@ -157,210 +163,115 @@ int main(int argc, char** argv) {
 				}
 			}
 		}
-		printf("\n");
+		printf("\n----------------------------------------------------------------\n");
 		printPidList_AUX(&os.processes, "processes", -1);
-
-		// Nuovi inserimenti
-		print_message_e(11);
-		fflush(stdout);
-		int yn;
-		while(1){
-			changemode(1);
-			while(!kbhit()){}
-			yn = getchar();
-			changemode(0);
-
-			if(yn=='y') goto insert_filename;
-			else if(yn=='n'){
-				break;
-			}
-			else{
-				print_message_e(4);
-				continue;
-			}
-		}
-
-		// START
-		char run = 1;
-		int steps;
-		while(run && OS_run(&os) ) {
-			steps = gets_steps();
-			if(steps==-1) break;
-			else if(steps==0){
-				while(OS_run(&os)) OS_simStep(&os);
-				run = 0;
-				break;
-			}
-			else {
-				for(int i=0; i<steps; i++){
-					if(!OS_run(&os)){
-						run = 0;
-						break;
-					}
-					OS_simStep(&os);
-				}
-			}
-		}
-		// STOP
+		printf("----------------------------------------------------------------\n");
 	}
 
-
-
-	// INSERIMENTO IN LINE
-	else if(loading_mode=='i'){
-
-		// ****
-		int enter;
-		while(1){
-			print_message_e(14);
-			fflush(stdout);
-
-			changemode(1);
-			while(!kbhit()){}
-			enter = getchar();
-			changemode(0);
-
-			if(enter=='\n'){
-				break;
-			}
-			else if(enter==' '){
-				Process* p;
-				int pid = gets_int(1, 9999, 16);
-				
-				ListItem* aux = List_find_process(&os.processes, pid);
-				if(!aux) aux = List_find_process(&os.ready, pid);
-				if(!aux) aux = List_find_process(&os.waiting, pid);
-				if(!aux) aux = List_find_process(&os.running, pid);
-				if(!aux){
-					// Processo non esistente: creare nuovo processo
-					Process new_process;
-					Process_init_inline(&new_process, pid, 0);
-					Process* new_process_ptr = (Process*)malloc(sizeof(Process));
-					*new_process_ptr = new_process;
-					p = new_process_ptr;
-
-					int cpu_burst = gets_int(1, 9999, 17);
-					int io_burst = gets_int(1, 9999, 18);
-					
-					Process_load_inline(new_process_ptr, cpu_burst, io_burst);
-
-					// Calcolo dei quantum predtcion
-					Process_CalculatePrediction(new_process_ptr, decay, NULL);
-
-					printf("\nLoading new process with pid: %d, arrival time: %d\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
-					printf("\nProcess with pid (%d) has %d events\n", new_process_ptr->pid, new_process_ptr->events.size);
-					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
-				}
-				else {
-					// Processo esistente
-					Process* existing_process = (Process*) aux;
-					p = existing_process;
-
-					int cpu_burst = gets_int(1, 9999, 17);
-					int io_burst = gets_int(1, 9999, 18);
-							
-					ProcessEvent* new_event = Process_load_inline(existing_process, cpu_burst, io_burst);
-
-					// Calcolo dei quantum predtcion
-					Process_CalculatePrediction(existing_process, decay, new_event);
-					printf("\nProcess with pid: %d already exists\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", existing_process->pid, cpu_burst, io_burst);
-					printf("\nProcess with pid (%d) has %d events\n", existing_process->pid, existing_process->events.size);
-				}
-				char pid_str[5];
-				sprintf(pid_str, "%d", pid);
-				Process_save_file(p, pid_str);
-				
-
-
-				// int cpu_burst = gets_int(1, 9999, 17);
-				// int io_burst = gets_int(1, 9999, 18);
-				
-				// Process_load_inline(&new_process, cpu_burst, io_burst);
-
-				// // Calcolo dei quantum predtcion
-				// Process_CalculatePrediction(&new_process, decay);
-
-				
-				// // if(List_find_process(&os.processes, (ListItem*)new_process_ptr)){
-				// // 	printf("\nProcess with pid (%d) is already loaded\n", new_process_ptr->pid);
-				// // 	continue;
-				// // }
-				// // else{
-				// 	printf("\nLoading process with pid: %d, arrival time: %d, CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
-				// 	List_pushBack(&os.processes, (ListItem*)new_process_ptr);
-				// // }
-				// printPidLists(&os);
-				
-			}
-			else if(enter=='q'){
-				print_message_e(5);
-				return EXIT_SUCCESS;
-			}
-			else{
-				print_message_e(4);
-				continue;
-			}
-		}
-	}
 	// START
-	// char run = 1;
-	// int steps;
-	// while(run && OS_run(&os) ) {
-	// 	steps = gets_steps();
-	// 	if(steps==-1) break;
-	// 	else if(steps==0){
-	// 		while(OS_run(&os)) OS_simStep(&os);
-	// 		run = 0;
-	// 		break;
-	// 	}
-	// 	else {
-	// 		for(int i=0; i<steps; i++){
-	// 			if(!OS_run(&os)){
-	// 				run = 0;
-	// 				break;
-	// 			}
-	// 			OS_simStep(&os);
-	// 		}
-	// 	}
-	// }
+	char run = 1;
+	int steps;
+	char bar = 1;
+	while(run /*&& OS_run(&os)*/ ) {
+		if(bar){
+			printEscape("8"); printf("\n************************"); printEscape("28");
+			printEscape("1;48;5;237");
+			printf(" TIME: %08d ", timer); printEscape("0");
+			printEscape("8"); printf("*************************"); printEscape("0");
+		}
+
+		steps = gets_steps();
+		if(steps==-1) break;
+		if(steps==-2) {
+			if(!enterInLine()) return EXIT_SUCCESS;
+			bar = 0;
+		}
+		else if(steps==0){
+			while(OS_run(&os)) OS_simStep(&os, &timer);
+			run = 0;
+			break;
+		}
+		else {
+			for(int i=0; i<steps; i++){
+				if(!OS_run(&os)){
+					run = 0;
+					break;
+				}
+				OS_simStep(&os, &timer);
+			}
+			bar = 1;
+		}
+	}
 	// STOP
 
-
-
 	printf("\n");
-	printPidList_AUX(&os.processes, "processes", -1);
-
-
-
-
 	print_message_e(5);
+
 	return EXIT_SUCCESS;
-	// *** inserire controlli numero di argomenti
+}
 
-	// int core = atoi(argv[1]);
-	
-	// OS_init(&os);
-	// scheduler_args srr_args;
-	// srr_args.core = core;
-	// os.schedule_args = &srr_args;
-	// os.schedule_fn = schedulerSJF;
-	
-	
 
-	// for (int i=2; i<argc; ++i){
-	// 	Process new_process;
-	// 	int num_events = Process_load_file(&new_process, argv[i]);
-	// 	Process_CalculatePrediction(&new_process);
+int enterInLine(){
 
-	// 	printf("loading [%s], pid: %d, events:%d", argv[i], new_process.pid, num_events);
-	// 	if (num_events) {
-	// 		Process* new_process_ptr = (Process*)malloc(sizeof(Process));
-	// 		*new_process_ptr = new_process;
-	// 		List_pushBack(&os.processes, (ListItem*)new_process_ptr); // inserisce alla fine
-	// 	}
-	// }
-	// printf("num processes in queue %d\n", os.processes.size);
-	// while(os.running.first || os.ready.first || os.waiting.first || os.processes.first) {
-	// 	OS_simStep(&os);
-	// }
+	while(1){
+		Process* p;
+		int pid = gets_int(0, 9999, 16);
+		if(pid==0) break;
+		
+		ListItem* aux = List_find_process(&os.waiting, pid);
+		if(aux) { print_message_e(14); continue; }
+
+		aux = List_find_process(&os.running, pid);
+		if(!aux) aux = List_find_process(&os.processes, pid);
+		if(!aux) aux = List_find_process(&os.ready, pid);
+		if(!aux){
+			// Processo non esistente: creare nuovo processo
+			Process new_process;
+			Process_init_inline(&new_process, pid, timer);
+
+			Process* new_process_ptr = (Process*)malloc(sizeof(Process));
+			*new_process_ptr = new_process;
+			p = new_process_ptr;
+
+			int cpu_burst = gets_int(1, 9999, 17);
+			int io_burst = gets_int(1, 9999, 18);
+			
+			Process_load_inline(new_process_ptr, cpu_burst, io_burst);
+
+			// Calcolo dei quantum predtcion
+			Process_CalculatePrediction(new_process_ptr, decay, NULL);
+
+			printf("\nLoading new process with pid: %d, arrival time: %d\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
+			printf("\nProcess with pid (%d) has %d events\n", new_process_ptr->pid, new_process_ptr->events.size);
+			List_pushBack(&os.processes, (ListItem*)new_process_ptr);
+		}
+		else {
+			// Processo esistente
+			Process* existing_process = (Process*) aux;
+			p = existing_process;
+
+			int cpu_burst = gets_int(1, 9999, 17);
+			int io_burst = gets_int(1, 9999, 18);
+					
+			ProcessEvent* new_event = Process_load_inline(existing_process, cpu_burst, io_burst);
+
+			// Process_save_file(p, "1");
+
+			// Calcolo dei quantum predtcion
+			Process_CalculatePrediction(existing_process, decay, new_event);
+
+			printf("\nProcess with pid: %d already exists\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", existing_process->pid, cpu_burst, io_burst);
+			printf("\nProcess with pid (%d) has %d events\n", existing_process->pid, existing_process->events.size);
+			
+			printf("%d\n", ((ProcessEvent*) existing_process->events.last->prev)->duration );
+		}
+		
+		char pid_str[5];
+		sprintf(pid_str, "%d", pid);
+		Process_save_file(p, pid_str);
+
+		break;
+	}
+	// 
+	return 1;
 }

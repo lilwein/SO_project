@@ -114,11 +114,16 @@ void Process_CalculatePrediction(Process* p, double decay, ProcessEvent* start){
 	ListItem* aux = p->events.first;
 	
 	if(start && List_find(&p->events, (ListItem*)start) ){
-		while(aux && (ProcessEvent*)aux != start ) aux = aux->next;
-		if(aux->prev){
-			quantum_pred = ((ProcessEvent*) aux->prev)->next_prediction;
+		while(aux && (ProcessEvent*)aux != start ){
+			ProcessEvent* e = (ProcessEvent*) aux;
+			if(e->type==CPU) quantum_pred = e->next_prediction;
+			aux = aux->next;
 			first_event = 0;
 		}
+		// if(aux->prev){
+		// 	quantum_pred = ((ProcessEvent*) aux->prev)->next_prediction;
+		// 	first_event = 0;
+		// }
 	}
 
 	while(aux){
