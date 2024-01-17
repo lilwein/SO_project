@@ -184,7 +184,7 @@ void print_message_e(char type){
 		// 8: insert processes
 		printEscape("48;5;234"); printf("Insert txt files contained in ");
 		printEscape("3"); printf("processes"); printEscape("23");
-		printf(" folder (ex: p1 p2 p3):"); printEscape("0"); printf(" ");
+		printf(" folder, without extension (ex: p1 p2 p3):"); printEscape("0"); printf(" ");
 	}
 	else if(type==9){
 		// 9: no process loaded

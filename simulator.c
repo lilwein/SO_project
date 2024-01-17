@@ -190,7 +190,6 @@ int main(int argc, char** argv) {
 			}
 			bar = 1;
 		}
-		// printf("\ntime: %d:\tOS_run: %d\trun: %d\tstop: %d\n", timer, OS_run(&os), run, stop);
 	}
 	// STOP
 
