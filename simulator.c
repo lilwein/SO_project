@@ -27,10 +27,23 @@ int main(int argc, char** argv) {
 	os.schedule_fn = schedulerSJF;
 
 	print_message_e(1);
-	print_message_e(2);
 
-	// Modalità di inserimento dei processi
-	int loading_mode;
+	// Inserimento numero di core
+	core = gets_int(1, 16, 12);
+	srr_args.core = core;
+	printf("Number of CPUs: "); printEscape("1"); printf("%d\n", core); printEscape("0");
+
+	// Inserimento decay coefficient
+	decay = gets_decay();
+	// srr_args.core = core;
+	printf("Decay Coefficient: "); printEscape("1"); printf("%f\n", decay); printEscape("0");
+
+
+
+	// INSERIMENTO VIA FILE
+
+	char loading_mode;
+	print_message_e(2);
 	while(1){
 		fflush(stdout);
 		changemode(1);
@@ -38,7 +51,7 @@ int main(int argc, char** argv) {
 		loading_mode = getchar();
 		changemode(0);
 
-		if(loading_mode=='f' || loading_mode=='i') break;
+		if(loading_mode=='\n' || loading_mode=='y' || loading_mode=='n') break;
 		else if(loading_mode=='h'){
 			print_message_e(3);
 			print_message_e(2);
@@ -53,23 +66,9 @@ int main(int argc, char** argv) {
 			continue;
 		}
 	}
-	if(loading_mode=='f') print_message_e(6);
-	else if(loading_mode=='i') print_message_e(7);
-
-	// Inserimento numero di core
-	core = gets_int(1, 16, 12);
-	srr_args.core = core;
-	printf("\nNumber of CPUs: %d\n", core);
-
-	// Inserimento decay coefficient
-	decay = gets_decay();
-	// srr_args.core = core;
-	printf("\nDecay Coefficient: %.6f\n", decay);
-
-
-
-	// INSERIMENTO VIA FILE
-	if(loading_mode=='f'){
+	
+	printf("\n");
+	if(loading_mode=='\n' || loading_mode=='y'){
 		// Inserimento filename
 		insert_filename: ;
 		char* files = (char*) malloc(MAX_SIZE_STRING);
@@ -77,7 +76,7 @@ int main(int argc, char** argv) {
 			print_message_e(8);
 			fgets(files, MAX_SIZE_STRING, stdin);
 		} while( !strcmp(files, "\n") );
-		printf("\n");
+		// printf("\n");
 		
 		int processes_ok = 0;
 		int processes_not_ok = 0;
@@ -131,48 +130,41 @@ int main(int argc, char** argv) {
 		free(files);
 
 		// Nessun processo inserito o errore nell'inserimento
-		if(!processes_ok || processes_not_ok){
-			printf("\n");
-			if(!processes_ok) print_message_e(9);
-			if(processes_not_ok) {
-				printEscape("48;5;234"); printf("%d processes have failed loading. ", processes_not_ok); printEscape("0");
-			}
+		printf("\n");
+		if(!processes_ok) print_message_e(9);
+		if(processes_not_ok) {
+			printEscape("48;5;234"); printf("%d processes have failed loading. ", processes_not_ok); printEscape("0");
 			print_message_e(10);
-			fflush(stdout);
-			int yn;
-			while(1){
-				changemode(1);
-				while(!kbhit()){}
-				yn = getchar();
-				changemode(0);
+		}
+		else print_message_e(11);
+		fflush(stdout);
+		char yn;
+		while(1){
+			changemode(1);
+			while(!kbhit()){}
+			yn = getchar();
+			changemode(0);
 
-				if(yn=='y') goto insert_filename;
-				else if(yn=='n'){
-					if(! os.processes.size){
-						printf("\n");
-						printPidList_AUX(&os.processes, "processes", -1);
-						printf("There are no processes.\n\n");
-						print_message_e(5);
-						return EXIT_SUCCESS;
-					}
-					break;
-				}
-				else{
-					print_message_e(4);
-					continue;
-				}
+			if(yn=='y' || yn=='\n') goto insert_filename;
+			else if(yn=='n'){
+				break;
+			}
+			else{
+				print_message_e(4);
+				continue;
 			}
 		}
+
 		printf("\n----------------------------------------------------------------\n");
 		printPidList_AUX(&os.processes, "processes", -1);
 		printf("----------------------------------------------------------------\n");
 	}
 
 	// START
-	char run = 1;
-	int steps;
 	char bar = 1;
-	while(run /*&& OS_run(&os)*/ ) {
+	int steps;
+
+	while(1) {
 		if(bar){
 			printEscape("8"); printf("\n************************"); printEscape("28");
 			printEscape("1;48;5;237");
@@ -180,7 +172,9 @@ int main(int argc, char** argv) {
 			printEscape("8"); printf("*************************"); printEscape("0");
 		}
 
-		steps = gets_steps();
+		if(!OS_run(&os)) steps = gets_last();
+		else steps = gets_steps();
+
 		if(steps==-1) break;
 		if(steps==-2) {
 			if(!enterInLine()) return EXIT_SUCCESS;
@@ -188,19 +182,15 @@ int main(int argc, char** argv) {
 		}
 		else if(steps==0){
 			while(OS_run(&os)) OS_simStep(&os, &timer);
-			run = 0;
-			break;
 		}
 		else {
 			for(int i=0; i<steps; i++){
-				if(!OS_run(&os)){
-					run = 0;
-					break;
-				}
+				if(!OS_run(&os)) break;
 				OS_simStep(&os, &timer);
 			}
 			bar = 1;
 		}
+		// printf("\ntime: %d:\tOS_run: %d\trun: %d\tstop: %d\n", timer, OS_run(&os), run, stop);
 	}
 	// STOP
 

@@ -127,35 +127,50 @@ int gets_steps(){
 	return number;
 };
 
+int gets_last(){
+	int lenght = MAX_BUFFER;
+	char* string = (char*) malloc(lenght);
+	print_message_e(19);
+	while(1){
+		print_message_e(20);
+		fflush(stdout);
+
+		fgets(string, lenght, stdin);
+		if(!strcmp(string, "q\n")) return -1;
+		if(!strcmp(string, "n\n") || !strcmp(string, "p\n")) return -2;
+	} 
+	return 0;
+};
+
 void print_message_e(char type){
 	if(type==1){
 		// 1: welcome
-		char* message = "\nWelcome to CPU Scheduler Simulator: Preemptive scheduler with Shortest Job First\n\n";
-		printEscape("1;7");	printf("%s", message); printEscape("0");
+		char* message = "\nWelcome to CPU Scheduler Simulator: Preemptive scheduler with Shortest Job First\n";
+		printEscape("1;4;7");	printf("%s", message); printEscape("0");
 	}
 	else if(type==2){
-		// 2: press
-		char* message_1 = "Press ";
-		char* message_2 = " for loading processes from file or ";
-		char* message_3 = " for loading processes in line (";
-		char* message_4 = " for help, ";
-		char* message_5 = " for quit)";
-		printEscape("48;5;234"); printf("%s", message_1); printEscape("1;3"); printf("f"); printEscape("22;23"); printf("%s", message_2); 
-		printEscape("1;3"); printf("i"); printEscape("22;23"); printf("%s", message_3); 
-		printEscape("1;3"); printf("h"); printEscape("22;23"); printf("%s", message_4); 
-		printEscape("1;3"); printf("q"); printEscape("22;23"); printf("%s", message_5);
-		printEscape("0"); printf("\n\n");
+		// 2: file
+		printf("\n"); printEscape("48;5;234");
+		printf("Do you want to load porcesses from file? (");
+		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
+		printf(" or "); 
+		printEscape("1;3"); printf("y"); printEscape("22;23");
+		printf(" for yes, "); 
+		printEscape("1;3"); printf("n"); printEscape("22;23");
+		printf(" for no, "); 
+		printEscape("1;3"); printf("h"); printEscape("22;23");
+		printf(" for help, "); 
+		printEscape("1;3"); printf("q"); printEscape("22;23");
+		printf(" for quit)");
+		printEscape("0"); printf("\n");
 	}
 	else if(type==3){
 		// 3: help
-		char* message_1 = "Loading from file:";
-		char* message_2 = " the simulator will load the processes written in txt file in \"processes\" folder. Txt file should be like:\n\n\tPROCESS\t\t[id] [arrival time]\n\tCPU_BURST\t[duration]\n\tIO_BURST\t[duration]\n\t...\t\t...\n\nFile must terminate with a IO_BURST line.\n\n";
-		char* message_3 = "Loading in line:";
-		char* message_4 = " the simulator will load the processes when you ask for it.\n\n";
-		printEscape("4"); printf("%s", message_1); printEscape("24");
-		printf("%s", message_2); printEscape("24");
-		printEscape("4"); printf("%s", message_3); printEscape("24");
-		printf("%s", message_4);
+		printf("\n");
+		printEscape("4"); printf("Loading from file:"); printEscape("24");
+		printf(" the simulator will load the processes written in txt file in \"processes\" folder. Txt file should be like:\n\n\tPROCESS\t\t[id] [arrival time]\n\tCPU_BURST\t[duration]\n\tIO_BURST\t[duration]\n\t...\t\t...\n\nFile must terminate with a IO_BURST line.\n\n");
+		printEscape("24");
+		printf("However, you can load processes into the OS (or events into a process) at any time\n");
 	}
 	else if(type==4){
 		// 4: invalid button
@@ -165,17 +180,9 @@ void print_message_e(char type){
 		// 5: goodbye
 		printEscape("1;7"); printf("Thank you for using CPU Scheduler Simulator!"); printEscape("0"); printf("\n");
 	}
-	else if(type==6){
-		// 6: loading from file
-		printEscape("1;7"); printf("LOADING FROM FILE"); printEscape("0"); printf("\n");
-	}
-	else if(type==7){
-		// 7: loading in line
-		printEscape("1;7"); printf("LOADING IN LINE"); printEscape("0"); printf("\n");
-	}
 	else if(type==8){
 		// 8: insert processes
-		printEscape("48;5;234"); printf("\nInsert txt files contained in ");
+		printEscape("48;5;234"); printf("Insert txt files contained in ");
 		printEscape("3"); printf("processes"); printEscape("23");
 		printf(" folder (ex: p1 p2 p3):"); printEscape("0"); printf(" ");
 	}
@@ -183,13 +190,21 @@ void print_message_e(char type){
 		// 9: no process loaded
 		printEscape("48;5;234"); printf("No process has ben loaded. "); printEscape("0");
 	}
-	else if(type==10){
+	else if(type==10 || type==11){
+		char* message;
 		// 10: try again
-		char* message = "Do you want to try again? (";
+		if(type==10) message = "Do you want to try again? (";
+		// 11: nuovi processi
+		if(type==11) message = "Do you want to load more processes? (";
+
 		printEscape("48;5;234"); printf("%s", message);
-		printEscape("1;3"); printf("y"); printEscape("22;23"); printf(" for yes, ");
-		printEscape("1;3"); printf("n"); printEscape("22;23"); printf(" for no)"); printEscape("0");
-		printf("\n");
+		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
+		printf(" or "); 
+		printEscape("1;3"); printf("y"); printEscape("22;23");
+		printf(" for yes, ");
+		printEscape("1;3"); printf("n"); printEscape("22;23");
+		printf(" for no)");
+		printEscape("0"); printf("\n");
 	}
 	else if(type==12){
 		// 12: get_core
@@ -253,6 +268,24 @@ void print_message_e(char type){
 		printEscape("48;5;234");
 		printf("Insert IO BURST:");
 		printEscape("0"); printf(" ");
+	}
+	else if(type==19){
+		// 19: gets_last
+		printf("\n\n"); printEscape("1;7;48;5;234");
+		printf("There are no processes in the OS."); 
+		printEscape("0"); printf("\n");
+		
+	}
+	else if(type==20){
+		// 20: gets_last
+		printEscape("48;5;234");
+		printf("Press ");
+		printEscape("1;3"); printf("n"); printEscape("22;23");
+		printf(" or ");
+		printEscape("1;3"); printf("p"); printEscape("22;23");
+		printf(" to CREATE a new process or ");
+		printEscape("1;3"); printf("q"); printEscape("22;23");
+		printf(" for quit."); printEscape("0"); printf(" ");
 	}
 	else assert(0 && "invalid argument");
 
