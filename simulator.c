@@ -224,6 +224,7 @@ int main(int argc, char** argv) {
 				break;
 			}
 			else if(enter==' '){
+				Process* p;
 				int pid = gets_int(1, 9999, 16);
 				
 				ListItem* aux = List_find_process(&os.processes, pid);
@@ -236,6 +237,7 @@ int main(int argc, char** argv) {
 					Process_init_inline(&new_process, pid, 0);
 					Process* new_process_ptr = (Process*)malloc(sizeof(Process));
 					*new_process_ptr = new_process;
+					p = new_process_ptr;
 
 					int cpu_burst = gets_int(1, 9999, 17);
 					int io_burst = gets_int(1, 9999, 18);
@@ -249,10 +251,10 @@ int main(int argc, char** argv) {
 					printf("\nProcess with pid (%d) has %d events\n", new_process_ptr->pid, new_process_ptr->events.size);
 					List_pushBack(&os.processes, (ListItem*)new_process_ptr);
 				}
-
 				else {
 					// Processo esistente
 					Process* existing_process = (Process*) aux;
+					p = existing_process;
 
 					int cpu_burst = gets_int(1, 9999, 17);
 					int io_burst = gets_int(1, 9999, 18);
@@ -263,10 +265,10 @@ int main(int argc, char** argv) {
 					Process_CalculatePrediction(existing_process, decay, new_event);
 					printf("\nProcess with pid: %d already exists\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", existing_process->pid, cpu_burst, io_burst);
 					printf("\nProcess with pid (%d) has %d events\n", existing_process->pid, existing_process->events.size);
-					char pid_str[5];
-					sprintf(pid_str, "%d", pid);
-					// Process_save_file(existing_process, pid_str);
 				}
+				char pid_str[5];
+				sprintf(pid_str, "%d", pid);
+				Process_save_file(p, pid_str);
 				
 
 
