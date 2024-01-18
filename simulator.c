@@ -215,15 +215,21 @@ int main(int argc, char** argv) {
 	printf("\n----------------------------------------------------------------\n");
 
 	// CPU Utilization
-	printEscape("1;48;5;234"); printf("CPU Utilization for each core:"); printEscape("0"); printf("\n");
+	printf("CPU Utilization for each core:\n");
+	double tot = 0;
 	for(int i=0; i<core; i++){
-		double u = (double) os.CPUs_utilization[i] / (double) timer;
-		// printf("\tCPU %d: utiliz: %d, %f\n", i, os.CPUs_utilization[i], u);
-		printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)(u*100) );
+		double u = ((double) os.CPUs_utilization[i] / (double) timer) * 100;
+		tot += u;
+		printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)u);
 	}
+	printEscape("1;48;5;234"); printf("Average CPU Utilization:\t\t\t\t"); 
+	printf("%d %%", (int) (tot/core)); printEscape("0"); printf("\n");
+	printf("----------------------------------------------------------------\n");
+
+	// Throughput
+	printEscape("1;48;5;234"); printf("Throughput (processes/time unit):\t\t\t"); printEscape("0");
+	printEscape("1;48;5;234"); printf("%.3f", (double)os.all_processes.size / timer); printEscape("0"); printf("\n");
 	printf("----------------------------------------------------------------\n\n");
-
-
 
 	print_message_e(5);
 	return EXIT_SUCCESS;
