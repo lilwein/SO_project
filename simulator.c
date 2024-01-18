@@ -209,27 +209,30 @@ int main(int argc, char** argv) {
 	printPidList_AUX(&os.all_processes, "All created or loaded processes:\n\t", -2);
 	printf("----------------------------------------------------------------\n");
 
-	// Waiting time
-	double waitingTime = waitingToRun_Time(&os);
-	printEscape("1;48;5;234"); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape("0");
-	printf("\n----------------------------------------------------------------\n");
+	if(os.all_processes.size){
+		// Waiting time
+		double waitingTime = waitingToRun_Time(&os);
+		printEscape("1;48;5;234"); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape("0");
+		printf("\n----------------------------------------------------------------\n");
 
-	// CPU Utilization
-	printf("CPU Utilization for each core:\n");
-	double tot = 0;
-	for(int i=0; i<core; i++){
-		double u = ((double) os.CPUs_utilization[i] / (double) timer) * 100;
-		tot += u;
-		printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)u);
+		// CPU Utilization
+		printf("CPU Utilization for each core:\n");
+		double tot = 0;
+		for(int i=0; i<core; i++){
+			double u = ((double) os.CPUs_utilization[i] / (double) timer) * 100;
+			tot += u;
+			printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)u);
+		}
+		printEscape("1;48;5;234"); printf("Average CPU Utilization:\t\t\t\t"); 
+		printf("%d %%", (int) (tot/core)); printEscape("0"); printf("\n");
+		printf("----------------------------------------------------------------\n");
+
+		// Throughput
+		printEscape("1;48;5;234"); printf("Throughput (processes/time unit):\t\t\t"); printEscape("0");
+		printEscape("1;48;5;234"); printf("%.3f", (double)os.all_processes.size / timer); printEscape("0"); printf("\n");
+		printf("----------------------------------------------------------------\n\n");
+	
 	}
-	printEscape("1;48;5;234"); printf("Average CPU Utilization:\t\t\t\t"); 
-	printf("%d %%", (int) (tot/core)); printEscape("0"); printf("\n");
-	printf("----------------------------------------------------------------\n");
-
-	// Throughput
-	printEscape("1;48;5;234"); printf("Throughput (processes/time unit):\t\t\t"); printEscape("0");
-	printEscape("1;48;5;234"); printf("%.3f", (double)os.all_processes.size / timer); printEscape("0"); printf("\n");
-	printf("----------------------------------------------------------------\n\n");
 
 	print_message_e(5);
 	return EXIT_SUCCESS;
