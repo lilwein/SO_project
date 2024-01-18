@@ -32,6 +32,7 @@ typedef struct OS{
 	ListHead processes;
 	ListHead all_processes;
 	int* CPUs_utilization;
+	int n_bursts;
 } OS;
 
 typedef struct {

@@ -199,9 +199,11 @@ int main(int argc, char** argv) {
 	printf("\n----------------------------------------------------------------\n");
 
 	// Total time
-	printEscape("1;48;5;234");
-	printf("Total time:\t\t\t%d", timer); printEscape("0");
-	printf("\n----------------------------------------------------------------\n");
+	printEscape("1;48;5;234"); printf("Number of CPUs:\t\t\t\t\t\t%d", core); printEscape("0"); printf("\n");
+	printEscape("1;48;5;234"); printf("Number of processes:\t\t\t\t\t%d", os.all_processes.size); printEscape("0"); printf("\n");
+	printEscape("1;48;5;234"); printf("Number of CPU and IO bursts:\t\t\t\t%d", os.n_bursts); printEscape("0"); printf("\n");
+	printEscape("1;48;5;234"); printf("Total time:\t\t\t\t\t\t%d", timer); printEscape("0"); printf("\n");
+	printf("----------------------------------------------------------------\n");
 
 	// Tutti i processi creati o caricati
 	printPidList_AUX(&os.all_processes, "All created or loaded processes:\n\t", -2);
@@ -209,7 +211,7 @@ int main(int argc, char** argv) {
 
 	// Waiting time
 	double waitingTime = waitingToRun_Time(&os);
-	printEscape("1;48;5;234"); printf("Average Waiting Time:\t%.2f", waitingTime); printEscape("0");
+	printEscape("1;48;5;234"); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape("0");
 	printf("\n----------------------------------------------------------------\n");
 
 	// CPU Utilization
@@ -217,7 +219,7 @@ int main(int argc, char** argv) {
 	for(int i=0; i<core; i++){
 		double u = (double) os.CPUs_utilization[i] / (double) timer;
 		// printf("\tCPU %d: utiliz: %d, %f\n", i, os.CPUs_utilization[i], u);
-		printf("\tCPU %d:\t\t\t%d %%\n", i, (int)(u*100) );
+		printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)(u*100) );
 	}
 	printf("----------------------------------------------------------------\n\n");
 

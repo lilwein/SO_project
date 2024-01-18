@@ -18,6 +18,8 @@ void OS_init(OS* os) {
 	
 	os->timer = 0;
 	os->schedule_fn = 0;
+
+	os->n_bursts = 0;
 }
 
 void OS_createProcess(OS* os, Process* p) {
@@ -56,6 +58,14 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->events = p->events;
 	new_pcb->usedThisTime = 0;
 	new_pcb->waitingToRun = 0;
+
+	// Aggiornamento campo n_burst
+	aux = new_pcb->events.first;
+	while(aux){
+		ProcessEvent* e = (ProcessEvent*) aux;
+		os->n_bursts += e->duration;
+		aux = aux->next;
+	}
 
 	// Controlliamo che il processo p abbia eventi
 	assert( new_pcb->events.first && "Error on creation: process without events");

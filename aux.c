@@ -149,7 +149,7 @@ double waitingToRun_Time(OS* os){
 	while(aux){
 		Short_PCB* pcb = (Short_PCB*) aux;
 		time += pcb->waitingToRun;
-		printf("\tprocess (%d):\t\t%d\n", pcb->pid, pcb->waitingToRun);
+		printf("\tprocess (%d):\t\t\t\t\t%d\n", pcb->pid, pcb->waitingToRun);
 		aux = aux->next;
 	}
 	return time / os->all_processes.size;
