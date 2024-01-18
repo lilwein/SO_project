@@ -20,17 +20,10 @@ double decay;
 int main(int argc, char** argv) {
 	system("clear");
 
-	// Inizializzazione OS
-	OS_init(&os);
-	scheduler_args srr_args;
-	os.schedule_args = &srr_args;
-	os.schedule_fn = schedulerSJF;
-
 	print_message_e(1);
 
 	// Inserimento numero di core
 	core = gets_int(1, 16, 12);
-	srr_args.core = core;
 	printf("Number of CPUs: "); printEscape("1"); printf("%d\n", core); printEscape("0");
 
 	// Inserimento decay coefficient
@@ -38,10 +31,16 @@ int main(int argc, char** argv) {
 	// srr_args.core = core;
 	printf("Decay Coefficient: "); printEscape("1"); printf("%f\n", decay); printEscape("0");
 
+	// Inizializzazione OS
+	OS_init(&os);
+	scheduler_args srr_args;
+	srr_args.core = core;
+	os.schedule_args = &srr_args;
+	os.schedule_fn = schedulerSJF;
+	os.CPUs_utilization = (int*) calloc(core, sizeof(int));
 
 
 	// INSERIMENTO VIA FILE
-
 	char loading_mode;
 	print_message_e(2);
 	while(1){
@@ -193,13 +192,34 @@ int main(int argc, char** argv) {
 	}
 	// STOP
 
+	// SCHEDULER STATISTICS
+	printEscape("7;1;8"); printf("\n\n**********************"); printEscape("28");
+	printf("SCHEDULER STATISTICS"); printEscape("8"); 
+	printf("**********************"); printEscape("0");
 	printf("\n----------------------------------------------------------------\n");
-	printPidList_AUX(&os.all_processes, "all processes", -1);
+
+	// Total time
+	printf("Total time:\t\t%d\n", timer);
 	printf("----------------------------------------------------------------\n");
 
+	// Tutti i processi creati o caricati
+	printPidList_AUX(&os.all_processes, "All created or loaded processes:\n\t", -2);
+	printf("----------------------------------------------------------------\n");
+
+	// Waiting time
 	double waitingTime = waitingToRun_Time(&os);
-	printEscape("1;7"); printf("Average Waiting Time: %f", waitingTime); printEscape("0");
-	printf("\n----------------------------------------------------------------\n\n");
+	printEscape("1;7"); printf("Average Waiting Time:\t%.2f", waitingTime); printEscape("0");
+	printf("\n----------------------------------------------------------------\n");
+
+	// CPU Utilization
+	printEscape("1;7"); printf("CPU Utilization for each core:\n"); printEscape("0");
+	for(int i=0; i<core; i++){
+		double u = (double) os.CPUs_utilization[i] / (double) timer;
+		// printf("\tCPU %d: utiliz: %d, %f\n", i, os.CPUs_utilization[i], u);
+		printf("\tCPU %d:\t\t%d %%\n", i, (int)(u*100) );
+	}
+	printf("----------------------------------------------------------------\n\n");
+
 
 
 	print_message_e(5);

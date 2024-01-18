@@ -265,6 +265,9 @@ void OS_simStep(OS* os, int* timer){
 				printf("in running while: pid (%d)\n", pcb->pid);
 			#endif
 
+			// Incremento CPU utilization per il core corrente
+			os->CPUs_utilization[i] ++;
+
 			/* Si pone il campo usedThisTime del processo corrente ad 1 cosicché non verrà preso in
 				considerazione dagli altri core. */
 			pcb->usedThisTime = 1;

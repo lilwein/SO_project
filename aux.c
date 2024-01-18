@@ -149,7 +149,7 @@ double waitingToRun_Time(OS* os){
 	while(aux){
 		Short_PCB* pcb = (Short_PCB*) aux;
 		time += pcb->waitingToRun;
-		printf("\tprocess (%d): %d\n", pcb->pid, pcb->waitingToRun);
+		printf("\tprocess (%d):\t%d\n", pcb->pid, pcb->waitingToRun);
 		aux = aux->next;
 	}
 	return time / os->all_processes.size;
@@ -167,7 +167,8 @@ void setZeroUsed(ListHead* head){
 
 void printPidList_AUX(ListHead* head, char* name, int n){
 	ListItem* item = head->first;
-	if(n==-1) printf("%s:\t", name);
+	if(n==-2) printf("%s", name);
+	else if(n==-1) printf("%s:\t", name);
 	else printf("%s %d:\t", name, n);
 	if(!item){
 		printf(" -\n");
