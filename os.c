@@ -14,6 +14,7 @@ void OS_init(OS* os) {
 	List_init(&os->ready);
 	List_init(&os->waiting);
 	List_init(&os->processes);
+	List_init(&os->all_processes);
 	
 	os->timer = 0;
 	os->schedule_fn = 0;
@@ -54,6 +55,7 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->pid = p->pid;
 	new_pcb->events = p->events;
 	new_pcb->usedThisTime = 0;
+	new_pcb->waitingToRun = 0;
 
 	// Controlliamo che il processo p abbia eventi
 	assert( new_pcb->events.first && "Error on creation: process without events");
@@ -213,6 +215,16 @@ void OS_simStep(OS* os, int* timer){
 				if (! pcb->events.first) {
 					printf("\t\t\t"); printEscape("1;41"); printf("end process "); printEscape("3");
 					printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
+
+					// Creazione copia del pcb che verrà inserita in all_processes
+					Short_PCB* pcb_copy = (Short_PCB*) malloc(sizeof(Short_PCB));
+					pcb_copy->list.next = 0;
+					pcb_copy->list.prev = 0;
+					pcb_copy->pid = pcb->pid;
+					pcb_copy->usedThisTime = pcb->usedThisTime;
+					pcb_copy->waitingToRun = pcb->waitingToRun;
+					List_pushBack(&os->all_processes, (ListItem*)pcb_copy);
+
 					free(pcb);
 				}
 				// Ci sono ancora eventi di tipo CPU o IO
@@ -298,6 +310,16 @@ void OS_simStep(OS* os, int* timer){
 				if (! pcb->events.first) {
 					printf("\t\t\t"); printEscape("1;41"); printf("end process "); printEscape("3");
 					printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
+
+					// Creazione copia del pcb che verrà inserita in all_processes
+					Short_PCB* pcb_copy = (Short_PCB*) malloc(sizeof(Short_PCB));
+					pcb_copy->list.next = 0;
+					pcb_copy->list.prev = 0;
+					pcb_copy->pid = pcb->pid;
+					pcb_copy->usedThisTime = pcb->usedThisTime;
+					pcb_copy->waitingToRun = pcb->waitingToRun;
+					List_pushBack(&os->all_processes, (ListItem*)pcb_copy);
+
 					free(pcb);
 				}
 				// Ci sono ancora eventi di tipo CPU o IO
@@ -340,6 +362,14 @@ void OS_simStep(OS* os, int* timer){
 	// Stampa liste
 	if(stampa)printPidLists(os);
 	printf("----------------------------------------------------------------\n");
+
+	//  ************
+	aux = os->ready.first;
+	while(aux){
+		PCB* pcb = (PCB*) aux;
+		if(!pcb->usedThisTime) pcb->waitingToRun ++;
+		aux = aux->next;
+	}
 
 	// Come anticipato prima, si devono ripristinare i valori di usedThisTime a 0 per tutti i processi.
 	setZeroUsed(&os->running);

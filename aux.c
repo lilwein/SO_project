@@ -142,6 +142,88 @@ int gets_last(){
 	return 0;
 };
 
+double waitingToRun_Time(OS* os){
+	ListItem* aux = os->all_processes.first;
+	double time = 0;
+	if(aux) printf("Time that processes spent waiting to be run:\n");
+	while(aux){
+		Short_PCB* pcb = (Short_PCB*) aux;
+		time += pcb->waitingToRun;
+		printf("\tprocess (%d): %d\n", pcb->pid, pcb->waitingToRun);
+		aux = aux->next;
+	}
+	return time / os->all_processes.size;
+};
+
+
+void setZeroUsed(ListHead* head){
+	ListItem* item = head->first;
+	while(item){
+		PCB* pcb = (PCB*) item;
+		pcb->usedThisTime = 0;
+		item = item->next;
+	}
+};
+
+void printPidList_AUX(ListHead* head, char* name, int n){
+	ListItem* item = head->first;
+	if(n==-1) printf("%s:\t", name);
+	else printf("%s %d:\t", name, n);
+	if(!item){
+		printf(" -\n");
+		return;
+	}
+	while(item){
+		PCB* pcb = (PCB*) item;
+		printf("(%d) ", pcb->pid);
+		item = item->next;
+	}
+	printf("\n");
+};
+void printPidListsDebug(OS* os, int n){
+	printf("+++++ LISTS %d +++++\n", n);
+	printPidList_AUX(&os->running, "running", n);
+	printPidList_AUX(&os->ready, "ready   ", n);
+	printPidList_AUX(&os->waiting, "waiting", n);
+	printUsed(os, "usedThisTime", n);
+	printf("\n");
+};
+
+void printPidLists(OS* os){
+	printPidList_AUX(&os->running, "running", -1);
+	printPidList_AUX(&os->ready, "ready   ", -1);
+	printPidList_AUX(&os->waiting, "waiting",-1);
+	// printPidList_AUX(&os->processes, "processes",-1);
+};
+
+int printUsed_AUX(ListHead* head){
+	int r = 0;
+	ListItem* item = head->first;
+	while(item){
+		PCB* pcb = (PCB*) item;
+		if(pcb->usedThisTime == 1){
+			printf("(%d) ", pcb->pid);
+			r = 1;
+		}
+		item = item->next;
+	}
+	return r;
+};
+void printUsed(OS* os, char* name, int n){
+	printf("%s %d:\t", name, n);
+	if (	printUsed_AUX(&os->running) +
+			printUsed_AUX(&os->waiting) +
+			printUsed_AUX(&os->ready) == 0
+	) printf("-");
+};
+
+void printEscape(char* str){
+	#ifdef _NO_ANSI
+		return;
+	#endif
+	printf("\e[%sm", str);
+}
+
 void print_message_e(char type){
 	if(type==1){
 		// 1: welcome
@@ -178,7 +260,7 @@ void print_message_e(char type){
 	}
 	else if(type==5){
 		// 5: goodbye
-		printEscape("1;7"); printf("Thank you for using CPU Scheduler Simulator!"); printEscape("0"); printf("\n");
+		printEscape("1;4;7"); printf("Thank you for using CPU Scheduler Simulator!"); printEscape("0"); printf("\n");
 	}
 	else if(type==8){
 		// 8: insert processes
@@ -287,80 +369,12 @@ void print_message_e(char type){
 		printEscape("1;3"); printf("q"); printEscape("22;23");
 		printf(" for quit."); printEscape("0"); printf(" ");
 	}
+	else if(type==21){
+		
+	}
 	else assert(0 && "invalid argument");
 
 };
-
-
-void setZeroUsed(ListHead* head){
-	ListItem* item = head->first;
-	while(item){
-		PCB* pcb = (PCB*) item;
-		pcb->usedThisTime = 0;
-		item = item->next;
-	}
-};
-
-void printPidList_AUX(ListHead* head, char* name, int n){
-	ListItem* item = head->first;
-	if(n==-1) printf("%s:\t", name);
-	else printf("%s %d:\t", name, n);
-	if(!item){
-		printf(" -\n");
-		return;
-	}
-	while(item){
-		PCB* pcb = (PCB*) item;
-		printf("(%d) ", pcb->pid);
-		item = item->next;
-	}
-	printf("\n");
-};
-void printPidListsDebug(OS* os, int n){
-	printf("+++++ LISTS %d +++++\n", n);
-	printPidList_AUX(&os->running, "running", n);
-	printPidList_AUX(&os->ready, "ready   ", n);
-	printPidList_AUX(&os->waiting, "waiting", n);
-	printUsed(os, "usedThisTime", n);
-	printf("\n");
-};
-
-void printPidLists(OS* os){
-	printPidList_AUX(&os->running, "running", -1);
-	printPidList_AUX(&os->ready, "ready   ", -1);
-	printPidList_AUX(&os->waiting, "waiting",-1);
-	// printPidList_AUX(&os->processes, "processes",-1);
-};
-
-int printUsed_AUX(ListHead* head){
-	int r = 0;
-	ListItem* item = head->first;
-	while(item){
-		PCB* pcb = (PCB*) item;
-		if(pcb->usedThisTime == 1){
-			printf("(%d) ", pcb->pid);
-			r = 1;
-		}
-		item = item->next;
-	}
-	return r;
-};
-void printUsed(OS* os, char* name, int n){
-	printf("%s %d:\t", name, n);
-	if (	printUsed_AUX(&os->running) +
-			printUsed_AUX(&os->waiting) +
-			printUsed_AUX(&os->ready) == 0
-	) printf("-");
-};
-
-void printEscape(char* str){
-	#ifdef _NO_ANSI
-		return;
-	#endif
-	printf("\e[%sm", str);
-}
-
-
 
 
 void changemode(int dir){

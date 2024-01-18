@@ -193,9 +193,16 @@ int main(int argc, char** argv) {
 	}
 	// STOP
 
-	printf("\n");
-	print_message_e(5);
+	printf("\n----------------------------------------------------------------\n");
+	printPidList_AUX(&os.all_processes, "all processes", -1);
+	printf("----------------------------------------------------------------\n");
 
+	double waitingTime = waitingToRun_Time(&os);
+	printEscape("1;7"); printf("Average Waiting Time: %f", waitingTime); printEscape("0");
+	printf("\n----------------------------------------------------------------\n\n");
+
+
+	print_message_e(5);
 	return EXIT_SUCCESS;
 }
 
@@ -214,6 +221,15 @@ int enterInLine(){
 		if(!aux) aux = List_find_process(&os.processes, pid);
 		if(!aux) aux = List_find_process(&os.ready, pid);
 		if(!aux){
+			// Processo non esistente ma esistito in passato
+			aux = List_find_process(&os.all_processes, pid);
+			if(aux){
+				printf("\n"); printEscape("4;48;5;234");
+				printf("Process with pid (%d) is already existed in the past. Please choose a different pid or select an existing process.", pid);
+				printEscape("0"); printf("\n");
+				continue;
+			}
+
 			// Processo non esistente: creare nuovo processo
 			Process new_process;
 			Process_init_inline(&new_process, pid, timer);

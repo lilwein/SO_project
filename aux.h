@@ -11,6 +11,8 @@ double gets_decay();
 
 void print_message_e(char type);
 
+double waitingToRun_Time(OS* os);
+
 void printPidLists(OS* os);
 void printPidList_AUX(ListHead* head, char* name, int n);
 void printPidListsDebug(OS* os, int n);

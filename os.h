@@ -8,7 +8,15 @@ typedef struct {
 	ListHead events;
 
 	char usedThisTime;
+	int waitingToRun;
 } PCB;
+
+typedef struct {
+	ListItem list;
+	int pid;
+	char usedThisTime;
+	int waitingToRun;
+} Short_PCB;
 
 struct OS;
 typedef void (*ScheduleFn)(struct OS* os, void* args);
@@ -22,6 +30,7 @@ typedef struct OS{
 	void* schedule_args;
 
 	ListHead processes;
+	ListHead all_processes;
 } OS;
 
 typedef struct {
