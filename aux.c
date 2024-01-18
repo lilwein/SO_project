@@ -258,7 +258,7 @@ void print_message_e(char type){
 	else if(type==2){
 		// 2: file
 		printf("\n"); printEscape("48;5;234");
-		printf("Do you want to load porcesses from file? (");
+		printf("Do you want to load processes from file? (");
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23");
 		printf(" or "); 
 		printEscape("1;3"); printf("y"); printEscape("22;23");
