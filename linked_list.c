@@ -1,4 +1,5 @@
 #include "linked_list.h"
+
 #include <assert.h>
 
 void List_init(ListHead* head) {
@@ -90,23 +91,17 @@ ListItem* List_popFront(ListHead* head) {
   	return List_detach(head, head->first);
 };
 
+void List_free_aux(ListHead* head, ListItem* item){
+	if(!item) return;
+	List_free_aux(head, item->next);
+	List_detach(head, item);
+};
 void List_free(ListHead* head) {
 	ListItem* item = head->first;
 	List_free_aux(head, item);
 };
 
-void List_free_aux(ListHead* head, ListItem* item){
-	if(!item) return;
-	List_free_aux(head, item->next);
-	List_detach(head, item);
-}
-
 ListItem* List_pushBackUnion(ListHead* head, ListItem* item) {
 	if(List_find(head, item)) return item;
   	return List_pushBack(head, item);
 };
-
-ListItem* List_pushFrontUnion(ListHead* head, ListItem* item) {
-	if(List_find(head, item)) return item;
-  	return List_pushFront(head, item);
-}

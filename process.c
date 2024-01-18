@@ -3,12 +3,16 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
+
 #include "process.h"
+#include "aux.h"
 
 #define LINE_LENGTH 1024
 
+
+// Process_load_file() carica un processo dal file filename
 int Process_load_file(Process* p, const char* filename) {
-	
+
 	FILE* f = fopen(filename, "r");
 	if (!f) return -1;
 	
@@ -22,9 +26,7 @@ int Process_load_file(Process* p, const char* filename) {
 	p->list.next = 0;
 	
 	int num_events = 0;
-
 	while (getline(&buffer, &line_length, f) > 0 ){
-		// got line in buf
 		int pid = -1;
 		int arrival_time = -1;
 		int num_tokens = 0;
@@ -39,7 +41,6 @@ int Process_load_file(Process* p, const char* filename) {
 
 		num_tokens = sscanf(buffer, "CPU_BURST %d", &duration);
 		if (num_tokens==1){
-			// we create a new event of type cpu burst
 			ProcessEvent* e = (ProcessEvent*) malloc(sizeof(ProcessEvent));
 			e->list.prev = 0;
 			e->list.next = 0;
@@ -53,7 +54,6 @@ int Process_load_file(Process* p, const char* filename) {
 		}
 		num_tokens=sscanf(buffer, "IO_BURST %d", &duration);
 		if (num_tokens==1){
-			// we create a new event of type cpu burst
 			ProcessEvent* e = (ProcessEvent*) malloc(sizeof(ProcessEvent));
 			e->list.prev = 0;
 			e->list.next = 0;
@@ -66,14 +66,79 @@ int Process_load_file(Process* p, const char* filename) {
 			continue;
 		}
 	}
-
 	if (buffer)
 		free(buffer);
 	fclose(f);
 
 	return num_events;
-}
+};
 
+
+// Process_save_file() salva il processo [p] in un file chiamato [p->pid].txt
+int Process_save_file(const Process* p){
+	
+	char pid_str[5]; sprintf(pid_str, "%d", p->pid);
+	
+	char* path = "./output/";
+	char* extension = ".txt";
+	char* name = (char*) malloc(strlen(path)+strlen(extension)+5);
+	strcpy(name, path);
+	strcat(name, pid_str);
+	strcat(name, extension);
+
+	FILE* f = fopen(name, "w");
+	if (!f) handle_error("Error on fopen(): ");
+	
+	fprintf(f, "PROCESS %d %d\n", p->pid, p->arrival_time);
+	ListItem* aux = p->events.first;
+	int num_events;
+
+	while(aux) {
+		ProcessEvent* e = (ProcessEvent*) aux;
+		switch(e->type){
+		case CPU:
+			fprintf(f, "CPU_BURST %d\n", e->duration);
+			++ num_events;
+			break;
+		case IO:
+			fprintf(f, "IO_BURST %d\n", e->duration);
+			++ num_events;
+			break;
+		default:;
+		}
+		aux = aux->next;
+	}
+
+	free(name);
+	fclose(f);
+	return num_events;
+};
+
+
+// Event_save_file() salva una coppia di eventi nel file del processo [p]
+void Event_save_file(const Process* p, int cpu_burst, int io_burst){
+	
+	char pid_str[5]; sprintf(pid_str, "%d", p->pid);
+
+	char* path = "./output/";
+	char* extension = ".txt";
+	char* name = (char*) malloc(strlen(path)+strlen(extension)+5);
+	strcpy(name, path);
+	strcat(name, pid_str);
+	strcat(name, extension);
+
+	FILE* f = fopen(name, "a");
+	if (!f) handle_error("Error on fopen(): ");
+
+	fprintf(f, "CPU_BURST %d\n", cpu_burst);
+	fprintf(f, "IO_BURST %d\n", io_burst);
+
+	free(name);
+	fclose(f);
+};
+
+
+// Process_init_inline() inizializza il processo [p] definito inline
 void Process_init_inline(Process* p, int pid, int arrival){
 	p->pid = pid;
 	p->arrival_time = arrival;
@@ -83,6 +148,8 @@ void Process_init_inline(Process* p, int pid, int arrival){
 	p->list.next = 0;
 };
 
+
+// Process_load_inline() aggiunge una coppia di eventi al processo [p] definito inline
 ProcessEvent* Process_load_inline(Process* p, int cpu_burst, int io_burst) {
 
 	ProcessEvent* e_CPU = (ProcessEvent*) malloc(sizeof(ProcessEvent));
@@ -106,13 +173,16 @@ ProcessEvent* Process_load_inline(Process* p, int cpu_burst, int io_burst) {
 	return e_CPU;
 };
 
+
+/* Process_CalculatePrediction() aggiorna i campi duration, quantum e next_predition
+	di ogni evento del processo [p], a partire dal processo [start]
+*/
 void Process_CalculatePrediction(Process* p, double decay, ProcessEvent* start){
 	
 	int quantum_pred;
 	char first_event = 1;
 
 	ListItem* aux = p->events.first;
-	
 	if(start && List_find(&p->events, (ListItem*)start) ){
 		while(aux && (ProcessEvent*)aux != start ){
 			ProcessEvent* e = (ProcessEvent*) aux;
@@ -120,10 +190,6 @@ void Process_CalculatePrediction(Process* p, double decay, ProcessEvent* start){
 			aux = aux->next;
 			first_event = 0;
 		}
-		// if(aux->prev){
-		// 	quantum_pred = ((ProcessEvent*) aux->prev)->next_prediction;
-		// 	first_event = 0;
-		// }
 	}
 
 	while(aux){
@@ -149,41 +215,3 @@ void Process_CalculatePrediction(Process* p, double decay, ProcessEvent* start){
 }
 
 
-int Process_save_file(const Process* p, const char* filename){
-	
-	char* path = "./output/";
-	char* extension = ".txt";
-	char* name = (char*) malloc(strlen(path)+strlen(extension)+5);
-	strcat(name, path);
-	strcat(name, filename);
-	strcat(name, extension);
-
-	FILE* f = fopen(name, "w");
-	if (!f) return -1;
-
-	fprintf(f, "PROCESS %d %d\n", p->pid, p->arrival_time);
-	ListItem* aux = p->events.first;
-	int num_events;
-
-	while(aux) {
-		ProcessEvent* e = (ProcessEvent*) aux;
-
-		switch(e->type){
-		case CPU:
-			fprintf(f, "CPU_BURST %d\n", e->duration);
-			++ num_events;
-			break;
-		case IO:
-			fprintf(f, "IO_BURST %d\n", e->duration);
-			++ num_events;
-			break;
-		default:;
-		}
-
-		aux = aux->next;
-	}
-
-	fclose(f);
-	return num_events;
-}
-	

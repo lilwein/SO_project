@@ -1,21 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <math.h>
 #include <unistd.h>
-
 #include <string.h>
 #include <ctype.h>
-
 #include <termios.h>
-#include <sys/types.h>
-#include <sys/time.h>
 
 #include "aux.h"
 #include "os.h"
 
 #define MAX_BUFFER 1024
 
+
+/* List_find_process() cerca nella lista il processo con pid [pid] e lo restituisce se lo trova,
+	altrimenti restituisce NULL */
 ListItem* List_find_process(ListHead* head, int pid) {
 	ListItem* aux = head->first;
 	while(aux){
@@ -27,6 +25,9 @@ ListItem* List_find_process(ListHead* head, int pid) {
   return NULL;
 };
 
+
+/* gets_int() prende il valore inserito da terminale e controlla se è un intero compreso tra [min] e [max].
+	In tal caso restituisce l'intero digitato, altrimenti continua a richiedere da terminale */
 int gets_int(int min, int max, char message){
 	int lenght = MAX_BUFFER;
 	char* string = (char*) malloc(lenght+1);
@@ -49,7 +50,7 @@ int gets_int(int min, int max, char message){
 			continue;
 		}
 		number = atoi(string);
-		if(number<min || number>=max){
+		if(number<min || number>max){
 			printf("Invalid number, please try again\n");
 			continue;
 		}
@@ -58,6 +59,9 @@ int gets_int(int min, int max, char message){
 	return number;
 };
 
+
+/* gets_decay() prende il valore inserito da terminale e controlla se è un numero compreso tra 0 e 1.
+	In tal caso restituisce il double digitato, altrimenti continua a richiedere da terminale */
 double gets_decay(){
 	int lenght = MAX_BUFFER;
 	char* string = (char*) malloc(lenght);
@@ -92,6 +96,12 @@ double gets_decay(){
 	return number;
 };
 
+
+/* gets_steps() prende il valore inserito da terminale.
+	Se è stato digitato "all", "q", "n" o "p", restituisce un certo valore.
+	Se è stato digitato ENTER, restituisce 1.
+	Se è stato digitato un intero controlla che non sia negativo e, in tal caso, lo restiutisce.
+	Altrimenti continua a richiedere da terminale. */
 int gets_steps(){
 	int lenght = MAX_BUFFER;
 	char* string = (char*) malloc(lenght);
@@ -127,6 +137,10 @@ int gets_steps(){
 	return number;
 };
 
+
+/* gets_last() prende il valore inserito da terminale.
+	Se è stato digitato "q", "n" o "p", restituisce un certo valore.
+	Altrimenti continua a richiedere da terminale. */
 int gets_last(){
 	int lenght = MAX_BUFFER;
 	char* string = (char*) malloc(lenght);
@@ -142,6 +156,8 @@ int gets_last(){
 	return 0;
 };
 
+
+// waitingToRun_Time() stampa a schermo la waiting time di ogni processo e ne restituisce la media
 double waitingToRun_Time(OS* os){
 	ListItem* aux = os->all_processes.first;
 	double time = 0;
@@ -156,6 +172,7 @@ double waitingToRun_Time(OS* os){
 };
 
 
+// setZeroUsed() imposta a 0 il campo "usedThisTime" di tutti i processi della lista
 void setZeroUsed(ListHead* head){
 	ListItem* item = head->first;
 	while(item){
@@ -165,6 +182,28 @@ void setZeroUsed(ListHead* head){
 	}
 };
 
+
+// FUNZIONI AUSILIARE
+int printUsed_AUX(ListHead* head){
+	int r = 0;
+	ListItem* item = head->first;
+	while(item){
+		PCB* pcb = (PCB*) item;
+		if(pcb->usedThisTime == 1){
+			printf("(%d) ", pcb->pid);
+			r = 1;
+		}
+		item = item->next;
+	}
+	return r;
+};
+void printUsed(OS* os, char* name, int n){
+	printf("%s %d:\t", name, n);
+	if (	printUsed_AUX(&os->running) +
+			printUsed_AUX(&os->waiting) +
+			printUsed_AUX(&os->ready) == 0
+	) printf("-");
+};
 void printPidList_AUX(ListHead* head, char* name, int n){
 	ListItem* item = head->first;
 	if(n==-2) printf("%s", name);
@@ -190,6 +229,7 @@ void printPidListsDebug(OS* os, int n){
 	printf("\n");
 };
 
+// printPidLists() stampa a schermo tutti i processi per ogni lista dell'OS
 void printPidLists(OS* os){
 	printPidList_AUX(&os->running, "running", -1);
 	printPidList_AUX(&os->ready, "ready   ", -1);
@@ -197,27 +237,9 @@ void printPidLists(OS* os){
 	// printPidList_AUX(&os->processes, "processes",-1);
 };
 
-int printUsed_AUX(ListHead* head){
-	int r = 0;
-	ListItem* item = head->first;
-	while(item){
-		PCB* pcb = (PCB*) item;
-		if(pcb->usedThisTime == 1){
-			printf("(%d) ", pcb->pid);
-			r = 1;
-		}
-		item = item->next;
-	}
-	return r;
-};
-void printUsed(OS* os, char* name, int n){
-	printf("%s %d:\t", name, n);
-	if (	printUsed_AUX(&os->running) +
-			printUsed_AUX(&os->waiting) +
-			printUsed_AUX(&os->ready) == 0
-	) printf("-");
-};
 
+/* printEscape inserisce [str] tra i caratteri di escape "\e[" e "m",
+	se _NO_ANSI non è definito. */
 void printEscape(char* str){
 	#ifdef _NO_ANSI
 		return;
@@ -225,6 +247,8 @@ void printEscape(char* str){
 	printf("\e[%sm", str);
 }
 
+
+// Funzione ausiliaria di stampa a schermo
 void print_message_e(char type){
 	if(type==1){
 		// 1: welcome
@@ -278,7 +302,7 @@ void print_message_e(char type){
 		// 10: try again
 		if(type==10) message = "Do you want to try again? (";
 		// 11: nuovi processi
-		if(type==11) message = "Do you want to load more processes? (";
+		if(type==11) message = "Do you want to load more processes from file? (";
 
 		printEscape("48;5;234"); printf("%s", message);
 		printEscape("1;3"); printf("ENTER"); printEscape("22;23");

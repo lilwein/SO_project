@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <unistd.h>
+
 #include "os.h"
 #include "aux.h"
 
@@ -9,16 +10,28 @@
 
 char stampa = 1;
 
+// OS_init() inizializza il sistema operativo [os]
 void OS_init(OS* os) {
+	// Lista processi in running
 	List_init(&os->running);
+
+	// Lista processi ready
 	List_init(&os->ready);
+
+	// Lista processi in waiting
 	List_init(&os->waiting);
+
+	// Lista processi arrivati
 	List_init(&os->processes);
+
+	// Lista di tutti i processi
 	List_init(&os->all_processes);
 	
+	// Timer e funzione di schedule
 	os->timer = 0;
 	os->schedule_fn = 0;
 
+	// Numero totale di bursts
 	os->n_bursts = 0;
 }
 
@@ -56,7 +69,11 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->list.prev = 0;
 	new_pcb->pid = p->pid;
 	new_pcb->events = p->events;
+
+	// PCB inizialmente non usato
 	new_pcb->usedThisTime = 0;
+
+	// Waiting time del processo inizialmente nullo
 	new_pcb->waitingToRun = 0;
 
 	// Aggiornamento campo n_burst
@@ -125,11 +142,9 @@ void OS_simStep(OS* os, int* timer){
 	scheduler_args* args = (scheduler_args*) os->schedule_args;
 	int core = args->core;
 
+	// Processi runnati in questo tempo
 	int runProcessTime = 0;
 	int* runPids = (int*) malloc(core*sizeof(int));
-
-	// Stampa liste
-	// if(stampa)printPidLists(os);
 
 	// RIPETERE PER OGNI CORE
 	for(int i=0; i<core; i++){
@@ -158,9 +173,6 @@ void OS_simStep(OS* os, int* timer){
 		if (os->schedule_fn && os->running.size < core){
 			(*os->schedule_fn) (os, os->schedule_args);
 		}
-
-		// Stampa liste
-		// if(stampa)printPidLists(os);
 
 		#ifdef _DEBUG
 			printPidListsDebug(os, 2);
@@ -282,6 +294,7 @@ void OS_simStep(OS* os, int* timer){
 				considerazione dagli altri core. */
 			pcb->usedThisTime = 1;
 
+			// Aggiornamento del numero di processi runnati al tempo corrente
 			assert(runProcessTime<core);
 			runPids[runProcessTime] = pcb->pid;
 			runProcessTime++;
@@ -376,7 +389,7 @@ void OS_simStep(OS* os, int* timer){
 	if(stampa)printPidLists(os);
 	printf("----------------------------------------------------------------\n");
 
-	//  ************
+	//  Incremento della Waiting Time dei processi che hanno aspettato in ready per tutto il tempo corrente
 	aux = os->ready.first;
 	while(aux){
 		PCB* pcb = (PCB*) aux;
@@ -396,6 +409,8 @@ void OS_simStep(OS* os, int* timer){
 	// sleep(1);
 }
 
+
+// OS_run() restituisce 1 se ci sono processi nel sistema operativo, 0 altrimenti
 int OS_run(OS* os){
 	return os->running.first || os->ready.first || os->waiting.first || os->processes.first;
 }
