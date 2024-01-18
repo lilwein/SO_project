@@ -11,13 +11,6 @@ typedef struct {
 	int waitingToRun;
 } PCB;
 
-typedef struct {
-	ListItem list;
-	int pid;
-	char usedThisTime;
-	int waitingToRun;
-} Short_PCB;
-
 struct OS;
 typedef void (*ScheduleFn)(struct OS* os, void* args);
 
@@ -41,6 +34,7 @@ typedef struct {
 
 void OS_init(OS* os);
 void OS_simStep(OS* os, int* timer);
+int OS_run(OS* os);
 void OS_destroy(OS* os);
 
-int OS_run(OS* os);
+PCB* PCB_copy(PCB* src);

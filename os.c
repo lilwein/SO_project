@@ -107,7 +107,7 @@ void OS_createProcess(OS* os, Process* p) {
 
 void OS_simStep(OS* os, int* timer){
 	*timer = os->timer;
-
+	printPidList_AUX(&os->all_processes,"ALL Processes", -1);
 	printEscape("7;1;8"); printf("\n*************************"); printEscape("28");
 	printf("TIME: %08d", os->timer);
 	printEscape("8"); printf("*************************\n"); printEscape("0");
@@ -239,12 +239,7 @@ void OS_simStep(OS* os, int* timer){
 					printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
 
 					// Creazione copia del pcb che verrà inserita in all_processes
-					Short_PCB* pcb_copy = (Short_PCB*) malloc(sizeof(Short_PCB));
-					pcb_copy->list.next = 0;
-					pcb_copy->list.prev = 0;
-					pcb_copy->pid = pcb->pid;
-					pcb_copy->usedThisTime = pcb->usedThisTime;
-					pcb_copy->waitingToRun = pcb->waitingToRun;
+					PCB* pcb_copy = PCB_copy(pcb);
 					List_pushBack(&os->all_processes, (ListItem*)pcb_copy);
 
 					free(pcb);
@@ -338,12 +333,7 @@ void OS_simStep(OS* os, int* timer){
 					printf("(%d)", pcb->pid); printEscape("0"); printf("\n");
 
 					// Creazione copia del pcb che verrà inserita in all_processes
-					Short_PCB* pcb_copy = (Short_PCB*) malloc(sizeof(Short_PCB));
-					pcb_copy->list.next = 0;
-					pcb_copy->list.prev = 0;
-					pcb_copy->pid = pcb->pid;
-					pcb_copy->usedThisTime = pcb->usedThisTime;
-					pcb_copy->waitingToRun = pcb->waitingToRun;
+					PCB* pcb_copy = PCB_copy(pcb);
 					List_pushBack(&os->all_processes, (ListItem*)pcb_copy);
 
 					free(pcb);
@@ -418,3 +408,14 @@ int OS_run(OS* os){
 void OS_destroy(OS* os) {
 }
 
+PCB* PCB_copy(PCB* src){
+	PCB* new_pcb = (PCB*) malloc(sizeof(PCB));
+	new_pcb->list.prev = 0;
+	new_pcb->list.next = 0;
+	new_pcb->pid = src->pid;
+	new_pcb->events = src->events;
+	new_pcb->usedThisTime = src->usedThisTime;
+	new_pcb->waitingToRun = src->waitingToRun;
+	
+	return new_pcb;
+}

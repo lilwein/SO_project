@@ -163,7 +163,7 @@ double waitingToRun_Time(OS* os){
 	double time = 0;
 	if(aux) printf("Time that processes spent waiting to be run:\n");
 	while(aux){
-		Short_PCB* pcb = (Short_PCB*) aux;
+		PCB* pcb = (PCB*) aux;
 		time += pcb->waitingToRun;
 		printf("\tprocess (%d):\t\t\t\t\t%d\n", pcb->pid, pcb->waitingToRun);
 		aux = aux->next;
