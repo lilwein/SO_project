@@ -74,7 +74,7 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->usedThisTime = 0;
 
 	// Waiting time del processo inizialmente nullo
-	new_pcb->waitingToRun = 0;
+	new_pcb->waitingTime = 0;
 
 	// Aggiornamento campo n_burst
 	aux = new_pcb->events.first;
@@ -383,7 +383,7 @@ void OS_simStep(OS* os, int* timer){
 	aux = os->ready.first;
 	while(aux){
 		PCB* pcb = (PCB*) aux;
-		if(!pcb->usedThisTime) pcb->waitingToRun ++;
+		if(!pcb->usedThisTime) pcb->waitingTime ++;
 		aux = aux->next;
 	}
 
@@ -415,7 +415,7 @@ PCB* PCB_copy(PCB* src){
 	new_pcb->pid = src->pid;
 	new_pcb->events = src->events;
 	new_pcb->usedThisTime = src->usedThisTime;
-	new_pcb->waitingToRun = src->waitingToRun;
+	new_pcb->waitingTime = src->waitingTime;
 	
 	return new_pcb;
 }

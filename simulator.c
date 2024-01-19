@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
 		printf("----------------------------------------------------------------\n");
 	
 		// Waiting time
-		double waitingTime = waitingToRun_Time(&os);
+		double waitingTime = waitingTime_OS(&os);
 		printEscape("1;48;5;234"); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape("0");
 		printf("\n----------------------------------------------------------------\n");
 

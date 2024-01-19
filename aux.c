@@ -157,15 +157,15 @@ int gets_last(){
 };
 
 
-// waitingToRun_Time() stampa a schermo la waiting time di ogni processo e ne restituisce la media
-double waitingToRun_Time(OS* os){
+// waitingTime_OS() stampa a schermo la waiting time di ogni processo e ne restituisce la media
+double waitingTime_OS(OS* os){
 	ListItem* aux = os->all_processes.first;
 	double time = 0;
 	if(aux) printf("Time that processes spent waiting to be run:\n");
 	while(aux){
 		PCB* pcb = (PCB*) aux;
-		time += pcb->waitingToRun;
-		printf("\tprocess (%d):\t\t\t\t\t%d\n", pcb->pid, pcb->waitingToRun);
+		time += pcb->waitingTime;
+		printf("\tprocess (%d):\t\t\t\t\t%d\n", pcb->pid, pcb->waitingTime);
 		aux = aux->next;
 	}
 	return time / os->all_processes.size;
