@@ -9,6 +9,7 @@
 
 #define MAX_SIZE_STRING 1024
 void enterInLine();
+void save_simulation(OS* os);
 
 OS os;
 int timer = 0;
@@ -229,48 +230,60 @@ int main(int argc, char** argv) {
 
 	// Statistiche dello scheduler
 	if(os.all_processes.size){
-		printEscape("7;1;8"); printf("\n\n**********************"); printEscape("28");
-		printf("SCHEDULER STATISTICS"); printEscape("8"); 
-		printf("**********************"); printEscape("0");
-		printf("\n----------------------------------------------------------------\n");
+		printf("\n\n");
+		for(int i=0; i<2; i++){
+			char e = 1;
+			if(i==1){
+				e = 0;
+				save_simulation(&os);
+			}
 
-		// Total time
-		printEscape("1;48;5;234"); printf("Number of CPUs:\t\t\t\t\t\t%d", core); printEscape("0"); printf("\n");
-		printEscape("1;48;5;234"); printf("Number of processes:\t\t\t\t\t%d", os.all_processes.size); printEscape("0"); printf("\n");
-		printEscape("1;48;5;234"); printf("Number of CPU and IO bursts:\t\t\t\t%d", os.n_bursts); printEscape("0"); printf("\n");
-		printEscape("1;48;5;234"); printf("Total time:\t\t\t\t\t\t%d", timer); printEscape("0"); printf("\n");
-		printf("----------------------------------------------------------------\n");
+			printEscape_2("7;1;8", e); printf("**********************"); printEscape_2("28", e);
+			printf("SCHEDULER STATISTICS"); printEscape_2("8", e); 
+			printf("**********************"); printEscape_2("0", e);
+			printf("\n----------------------------------------------------------------\n");
 
-		// Tutti i processi creati o caricati
-		printPidList_AUX(&os.all_processes, "All created or loaded processes:\n\t", -2);
-		printf("----------------------------------------------------------------\n");
-	
-		// Waiting time
-		double waitingTime = waitingTime_OS(&os);
-		printEscape("1;48;5;234"); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape("0");
-		printf("\n----------------------------------------------------------------\n");
+			// Total time
+			printEscape_2("1;48;5;234", e); printf("Number of CPUs:\t\t\t\t\t\t%d", core); printEscape_2("0", e); printf("\n");
+			printEscape_2("1;48;5;234", e); printf("Number of processes:\t\t\t\t\t%d", os.all_processes.size); printEscape_2("0", e); printf("\n");
+			printEscape_2("1;48;5;234", e); printf("Number of CPU and IO bursts:\t\t\t\t%d", os.n_bursts); printEscape_2("0", e); printf("\n");
+			printEscape_2("1;48;5;234", e); printf("Total time:\t\t\t\t\t\t%d", timer); printEscape_2("0", e); printf("\n");
+			printf("----------------------------------------------------------------\n");
 
-		// Turnaround time
-		double turnaroundTime = turnaroundTime_OS(&os);
-		printEscape("1;48;5;234"); printf("Average Turnaround Time:\t\t\t\t%.2f", turnaroundTime); printEscape("0");
-		printf("\n----------------------------------------------------------------\n");
+			// Tutti i processi creati o caricati
+			printPidList_AUX(&os.all_processes, "All created or loaded processes:\n\t", -2);
+			printf("----------------------------------------------------------------\n");
+		
+			// Waiting time
+			double waitingTime = waitingTime_OS(&os);
+			printEscape_2("1;48;5;234", e); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape_2("0", e);
+			printf("\n----------------------------------------------------------------\n");
 
-		// CPU Utilization
-		printf("CPU Utilization for each core:\n");
-		double tot = 0;
-		for(int i=0; i<core; i++){
-			double u = ((double) os.CPUs_utilization[i] / (double) timer) * 100;
-			tot += u;
-			printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)u);
+			// Turnaround time
+			double turnaroundTime = turnaroundTime_OS(&os);
+			printEscape_2("1;48;5;234", e); printf("Average Turnaround Time:\t\t\t\t%.2f", turnaroundTime); printEscape_2("0", e);
+			printf("\n----------------------------------------------------------------\n");
+
+			// CPU Utilization
+			printf("CPU Utilization for each core:\n");
+			double tot = 0;
+			for(int i=0; i<core; i++){
+				double u = ((double) os.CPUs_utilization[i] / (double) timer) * 100;
+				tot += u;
+				printf("\tCPU %d:\t\t\t\t\t\t%d %%\n", i, (int)u);
+			}
+			printEscape_2("1;48;5;234", e); printf("Average CPU Utilization:\t\t\t\t"); 
+			printf("%d %%", (int) (tot/core)); printEscape_2("0", e); printf("\n");
+			printf("----------------------------------------------------------------\n");
+
+			// Throughput
+			printEscape_2("1;48;5;234", e); printf("Throughput (processes/time unit):\t\t\t"); printEscape_2("0", e);
+			printEscape_2("1;48;5;234", e); printf("%.3f", (double)os.all_processes.size / timer); printEscape_2("0", e); printf("\n");
+			printf("----------------------------------------------------------------\n\n");
+			
+			if(i==1) freopen("/dev/tty", "w", stdout);
+			#undef _NO_ANSI
 		}
-		printEscape("1;48;5;234"); printf("Average CPU Utilization:\t\t\t\t"); 
-		printf("%d %%", (int) (tot/core)); printEscape("0"); printf("\n");
-		printf("----------------------------------------------------------------\n");
-
-		// Throughput
-		printEscape("1;48;5;234"); printf("Throughput (processes/time unit):\t\t\t"); printEscape("0");
-		printEscape("1;48;5;234"); printf("%.3f", (double)os.all_processes.size / timer); printEscape("0"); printf("\n");
-		printf("----------------------------------------------------------------\n\n");
 	}
 
 	print_message_e(5);
@@ -358,4 +371,53 @@ void enterInLine(){
 
 		break;
 	}
+};
+
+void save_simulation(OS* os){
+
+	char* path = (char*) malloc(MAX_SIZE_STRING);
+	strcpy(path, "./output/");
+	char core_str[2]; sprintf(core_str, "%d", core);
+	strcat(path, core_str);
+	strcat(path, "-cpus");
+
+	char** procs_array = (char**) malloc(os->all_processes.size*sizeof(char*));
+	int k = 0;
+
+	ListItem* aux = os->all_processes.first;
+	while(aux){
+		PCB* pcb = (PCB*) aux;
+
+		char* proc = (char*) malloc(MAX_SIZE_STRING);
+		strcat(proc, "p");
+		char pid_str[PROC_MAX_LENGHT]; sprintf(pid_str, "%d", pcb->pid);
+		strcat(proc, pid_str);
+
+		strcat(path, "_");
+		strcat(path, proc);
+
+		// printf("\n%s\n", aaa);
+		procs_array[k++] = proc;
+
+		aux = aux->next;
+	}
+	char* mkdir = (char*) malloc(10+strlen(path));
+	strcpy(mkdir, "mkdir -p ");
+	strcat(mkdir, path);
+	system(mkdir);
+
+	strcat(path, "/");
+	
+	for(int i=0; i<os->all_processes.size; i++){
+		char* mv = (char*) malloc(18+strlen(procs_array[i])+strlen(path));
+		sprintf(mv, "mv ./temp/%s.txt %s", procs_array[i], path);
+		system(mv);
+	}
+
+	strcat(path, "statistics.txt");
+	printf("\n%s\n", path);
+	freopen(path, "w+", stdout);
+
+	free(path);
+	free(mkdir);
 }

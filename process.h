@@ -1,6 +1,8 @@
 #pragma once
 #include "linked_list.h"
 
+#define PROC_MAX_LENGHT 5
+
 typedef enum {CPU=0, IO=1} ResourceType;
 
 typedef struct {

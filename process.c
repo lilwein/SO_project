@@ -9,7 +9,6 @@
 
 #define LINE_LENGTH 1024
 
-
 // Process_load_file() carica un processo dal file filename
 int Process_load_file(Process* p, const char* filename) {
 
@@ -77,11 +76,11 @@ int Process_load_file(Process* p, const char* filename) {
 // Process_save_file() salva il processo [p] in un file chiamato [p->pid].txt
 int Process_save_file(const Process* p){
 	
-	char pid_str[5]; sprintf(pid_str, "%d", p->pid);
+	char pid_str[PROC_MAX_LENGHT]; sprintf(pid_str, "%d", p->pid);
 	
-	char* path = "./output/";
+	char* path = "./temp/p";
 	char* extension = ".txt";
-	char* name = (char*) malloc(strlen(path)+strlen(extension)+5);
+	char* name = (char*) malloc(strlen(path)+strlen(extension)+PROC_MAX_LENGHT);
 	strcpy(name, path);
 	strcat(name, pid_str);
 	strcat(name, extension);
@@ -118,11 +117,11 @@ int Process_save_file(const Process* p){
 // Event_save_file() salva una coppia di eventi nel file del processo [p]
 void Event_save_file(const Process* p, int cpu_burst, int io_burst){
 	
-	char pid_str[5]; sprintf(pid_str, "%d", p->pid);
+	char pid_str[PROC_MAX_LENGHT]; sprintf(pid_str, "%d", p->pid);
 
-	char* path = "./output/";
+	char* path = "./temp/p";
 	char* extension = ".txt";
-	char* name = (char*) malloc(strlen(path)+strlen(extension)+5);
+	char* name = (char*) malloc(strlen(path)+strlen(extension)+PROC_MAX_LENGHT);
 	strcpy(name, path);
 	strcat(name, pid_str);
 	strcat(name, extension);

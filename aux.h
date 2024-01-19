@@ -16,6 +16,7 @@ void printPidListsDebug(OS* os, int n);
 void printPidLists(OS* os);
 
 void printEscape(char* str);
+void printEscape_2(char* str, char escape);
 
 void print_message_e(char type);
 

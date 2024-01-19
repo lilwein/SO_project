@@ -219,8 +219,11 @@ void printEscape(char* str){
 		return;
 	#endif
 	printf("\e[%sm", str);
+};
+// Funzione alternativa
+void printEscape_2(char* str, char escape){
+	if(escape) printf("\e[%sm", str);
 }
-
 
 // Funzione ausiliaria di stampa a schermo
 void print_message_e(char type){
