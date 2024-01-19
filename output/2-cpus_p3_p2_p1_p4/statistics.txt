@@ -1,0 +1,32 @@
+**********************SCHEDULER STATISTICS**********************
+----------------------------------------------------------------
+Number of CPUs:						2
+Number of processes:					4
+Number of CPU and IO bursts:				80
+Total time:						37
+----------------------------------------------------------------
+All created or loaded processes:
+	(3) (2) (1) (4) 
+----------------------------------------------------------------
+Time that processes spent waiting in ready queue:
+	process (3):					2
+	process (2):					3
+	process (1):					5
+	process (4):					6
+Average Waiting Time:					4.00
+----------------------------------------------------------------
+Time that OS spent to complete a process:
+	process (3):					16
+	process (2):					25
+	process (1):					28
+	process (4):					36
+Average Turnaround Time:				26.25
+----------------------------------------------------------------
+CPU Utilization for each core:
+	CPU 0:						86 %
+	CPU 1:						67 %
+Average CPU Utilization:				77 %
+----------------------------------------------------------------
+Throughput (processes/time unit):			0.108
+----------------------------------------------------------------
+

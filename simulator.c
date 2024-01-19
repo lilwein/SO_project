@@ -18,6 +18,8 @@ double decay;
 
 int main(int argc, char** argv) {
 	system("clear");
+	system("rm -r -f temp");
+	system("mkdir temp");
 
 	print_message_e(1);
 
@@ -398,7 +400,6 @@ void save_simulation(OS* os){
 
 		procs_array[k++] = proc;
 
-		free(proc);
 		aux = aux->next;
 	}
 	char* mkdir = (char*) malloc(10+strlen(path));
@@ -412,6 +413,8 @@ void save_simulation(OS* os){
 		char* mv = (char*) malloc(18+strlen(procs_array[i])+strlen(path));
 		sprintf(mv, "mv ./temp/%s.txt %s", procs_array[i], path);
 		system(mv);
+
+		free(procs_array[i]);
 	}
 
 	strcat(path, "statistics.txt");
@@ -420,5 +423,6 @@ void save_simulation(OS* os){
 
 	free(path);
 	free(mkdir);
+
 	free(procs_array);
 }
