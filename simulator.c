@@ -250,6 +250,11 @@ int main(int argc, char** argv) {
 		printEscape("1;48;5;234"); printf("Average Waiting Time:\t\t\t\t\t%.2f", waitingTime); printEscape("0");
 		printf("\n----------------------------------------------------------------\n");
 
+		// Turnaround time
+		double turnaroundTime = turnaroundTime_OS(&os);
+		printEscape("1;48;5;234"); printf("Average Turnaround Time:\t\t\t\t%.2f", turnaroundTime); printEscape("0");
+		printf("\n----------------------------------------------------------------\n");
+
 		// CPU Utilization
 		printf("CPU Utilization for each core:\n");
 		double tot = 0;

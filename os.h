@@ -41,5 +41,7 @@ void OS_destroy(OS* os);
 PCB* PCB_copy(PCB* src);
 
 double waitingTime_OS(OS* os);
+double turnaroundTime_OS(OS* os);
+void turnaroundTime_inc(OS* os);
 
 void setZeroUsed(ListHead* head);

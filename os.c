@@ -76,6 +76,9 @@ void OS_createProcess(OS* os, Process* p) {
 	// Waiting time del processo inizialmente nullo
 	new_pcb->waitingTime = 0;
 
+	// Turnaround time del processo inizialmente nullo
+	new_pcb->turnaroundTime = 0;
+
 	// Aggiornamento campo n_burst
 	aux = new_pcb->events.first;
 	while(aux){
@@ -145,6 +148,9 @@ void OS_simStep(OS* os, int* timer){
 	// Processi runnati in questo tempo
 	int runProcessTime = 0;
 	int* runPids = (int*) malloc(core*sizeof(int));
+
+	// Incremento del Turnaround Time
+	turnaroundTime_inc(os);
 
 	// RIPETERE PER OGNI CORE
 	for(int i=0; i<core; i++){
@@ -416,6 +422,7 @@ PCB* PCB_copy(PCB* src){
 	new_pcb->events = src->events;
 	new_pcb->usedThisTime = src->usedThisTime;
 	new_pcb->waitingTime = src->waitingTime;
+	new_pcb->turnaroundTime = src->turnaroundTime;
 	
 	return new_pcb;
 };
@@ -424,7 +431,7 @@ PCB* PCB_copy(PCB* src){
 double waitingTime_OS(OS* os){
 	ListItem* aux = os->all_processes.first;
 	double time = 0;
-	if(aux) printf("Time that processes spent waiting to be run:\n");
+	if(aux) printf("Time that processes spent waiting in ready queue:\n");
 	while(aux){
 		PCB* pcb = (PCB*) aux;
 		time += pcb->waitingTime;
@@ -432,6 +439,39 @@ double waitingTime_OS(OS* os){
 		aux = aux->next;
 	}
 	return time / os->all_processes.size;
+};
+
+// turnaroundTime_OS() stampa a schermo il turnaround time di ogni processo e ne restituisce la media
+double turnaroundTime_OS(OS* os){
+	ListItem* aux = os->all_processes.first;
+	double time = 0;
+	if(aux) printf("Time that OS spent to complete a process:\n");
+	while(aux){
+		PCB* pcb = (PCB*) aux;
+		time += pcb->turnaroundTime;
+		printf("\tprocess (%d):\t\t\t\t\t%d\n", pcb->pid, pcb->turnaroundTime);
+		aux = aux->next;
+	}
+	return time / os->all_processes.size;
+};
+
+// Funzione ausiliaria per turnaroundTime_inc()
+void turnaroundTime_inc_AUX(ListHead* head){
+	ListItem* aux = head->first;
+	printf("\nAAAAAAAAAAAA\n");
+	while(aux){
+		PCB* pcb = (PCB*) aux;
+		pcb->turnaroundTime ++;
+		aux = aux->next;
+	}
+};
+
+// turnaroundTime_inc() incrementa il turnaroundTime di ogni processo running, ready o waiting
+void turnaroundTime_inc(OS* os){
+	turnaroundTime_inc_AUX(&os->running);
+	turnaroundTime_inc_AUX(&os->ready);
+	turnaroundTime_inc_AUX(&os->waiting);
+	turnaroundTime_inc_AUX(&os->processes);
 };
 
 
