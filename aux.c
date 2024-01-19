@@ -157,32 +157,6 @@ int gets_last(){
 };
 
 
-// waitingTime_OS() stampa a schermo la waiting time di ogni processo e ne restituisce la media
-double waitingTime_OS(OS* os){
-	ListItem* aux = os->all_processes.first;
-	double time = 0;
-	if(aux) printf("Time that processes spent waiting to be run:\n");
-	while(aux){
-		PCB* pcb = (PCB*) aux;
-		time += pcb->waitingTime;
-		printf("\tprocess (%d):\t\t\t\t\t%d\n", pcb->pid, pcb->waitingTime);
-		aux = aux->next;
-	}
-	return time / os->all_processes.size;
-};
-
-
-// setZeroUsed() imposta a 0 il campo "usedThisTime" di tutti i processi della lista
-void setZeroUsed(ListHead* head){
-	ListItem* item = head->first;
-	while(item){
-		PCB* pcb = (PCB*) item;
-		pcb->usedThisTime = 0;
-		item = item->next;
-	}
-};
-
-
 // FUNZIONI AUSILIARE
 int printUsed_AUX(ListHead* head){
 	int r = 0;

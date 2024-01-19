@@ -11,10 +11,6 @@ double gets_decay();
 int gets_steps();
 int gets_last();
 
-double waitingTime_OS(OS* os);
-
-void setZeroUsed(ListHead* head);
-
 void printPidList_AUX(ListHead* head, char* name, int n);
 void printPidListsDebug(OS* os, int n);
 void printPidLists(OS* os);

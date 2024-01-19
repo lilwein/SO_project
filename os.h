@@ -9,6 +9,7 @@ typedef struct {
 
 	char usedThisTime;
 	int waitingTime;
+	int turnaroundTime;
 } PCB;
 
 struct OS;
@@ -38,3 +39,7 @@ int OS_run(OS* os);
 void OS_destroy(OS* os);
 
 PCB* PCB_copy(PCB* src);
+
+double waitingTime_OS(OS* os);
+
+void setZeroUsed(ListHead* head);
