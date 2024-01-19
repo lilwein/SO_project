@@ -328,7 +328,7 @@ void OS_simStep(OS* os, int* timer){
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
-				free(e);
+				free(e); // munmap_chunk(): invalid pointer
 
 				// Eliminazione del pcb dalla running list
 				List_detach(&os->running, (ListItem*)pcb);
@@ -458,7 +458,6 @@ double turnaroundTime_OS(OS* os){
 // Funzione ausiliaria per turnaroundTime_inc()
 void turnaroundTime_inc_AUX(ListHead* head){
 	ListItem* aux = head->first;
-	printf("\nAAAAAAAAAAAA\n");
 	while(aux){
 		PCB* pcb = (PCB*) aux;
 		pcb->turnaroundTime ++;
@@ -471,7 +470,6 @@ void turnaroundTime_inc(OS* os){
 	turnaroundTime_inc_AUX(&os->running);
 	turnaroundTime_inc_AUX(&os->ready);
 	turnaroundTime_inc_AUX(&os->waiting);
-	turnaroundTime_inc_AUX(&os->processes);
 };
 
 
