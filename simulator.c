@@ -396,9 +396,9 @@ void save_simulation(OS* os){
 		strcat(path, "_");
 		strcat(path, proc);
 
-		// printf("\n%s\n", aaa);
 		procs_array[k++] = proc;
 
+		free(proc);
 		aux = aux->next;
 	}
 	char* mkdir = (char*) malloc(10+strlen(path));
@@ -415,9 +415,10 @@ void save_simulation(OS* os){
 	}
 
 	strcat(path, "statistics.txt");
-	printf("\n%s\n", path);
+
 	freopen(path, "w+", stdout);
 
 	free(path);
 	free(mkdir);
+	free(procs_array);
 }

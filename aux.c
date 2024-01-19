@@ -262,7 +262,7 @@ void print_message_e(char type){
 	}
 	else if(type==5){
 		// 5: goodbye
-		printEscape("1;4;7"); printf("Thank you for using CPU Scheduler Simulator!"); printEscape("0"); printf("\n");
+		printEscape("1;4;7"); printf("Thank you for using CPU Scheduler Simulator!"); printEscape("0"); printf("\n\n");
 	}
 	else if(type==8){
 		// 8: insert processes
