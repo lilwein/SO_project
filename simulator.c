@@ -301,7 +301,7 @@ int main(int argc, char** argv) {
 			printf("----------------------------------------------------------------\n\n");
 			
 			if(i==1) freopen("/dev/tty", "w", stdout); // LINUX
-			if(i==1) freopen("CON", "w", stdout); // WINDOWS
+			// if(i==1) freopen("CON", "w", stdout); // WINDOWS
 			#undef _NO_ANSI
 		}
 	}
