@@ -300,7 +300,8 @@ int main(int argc, char** argv) {
 			printEscape_2("1;48;5;234", e); printf("%.3f", (double)os.all_processes.size / timer); printEscape_2("0", e); printf("\n");
 			printf("----------------------------------------------------------------\n\n");
 			
-			if(i==1) freopen("/dev/tty", "w", stdout); // ONLY LINUX
+			if(i==1) freopen("/dev/tty", "w", stdout); // LINUX
+			if(i==1) freopen("CON", "w", stdout); // WINDOWS
 			#undef _NO_ANSI
 		}
 	}
