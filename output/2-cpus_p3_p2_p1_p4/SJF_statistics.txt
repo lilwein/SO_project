@@ -1,4 +1,5 @@
 **********************SCHEDULER STATISTICS**********************
+SHORTEST JOB FIRST
 ----------------------------------------------------------------
 Number of CPUs:						2
 Number of processes:					4
