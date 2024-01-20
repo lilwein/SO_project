@@ -411,9 +411,7 @@ int OS_run(OS* os){
 	return os->running.first || os->ready.first || os->waiting.first || os->processes.first;
 }
 
-void OS_destroy(OS* os) {
-}
-
+// PCB_copy() restituisce una copia del pcb [src]
 PCB* PCB_copy(PCB* src){
 	PCB* new_pcb = (PCB*) malloc(sizeof(PCB));
 	new_pcb->list.prev = 0;
