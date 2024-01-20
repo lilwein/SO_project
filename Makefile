@@ -7,9 +7,10 @@ OBJS=linked_list.o\
 	 process.o\
      os.o\
 	 aux.o\
-	 scheduler_SJF.o
+	 scheduler_SJF.o\
+	 scheduler_RR.o
 
-HEADERS=linked_list.h process.h os.h aux.h scheduler_SJF.h
+HEADERS=linked_list.h process.h os.h aux.h scheduler.h
 
 BINS= simulator
 

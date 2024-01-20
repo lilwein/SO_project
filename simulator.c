@@ -5,11 +5,11 @@
 
 #include "os.h"
 #include "aux.h"
-#include "scheduler_SJF.h"
+#include "scheduler.h"
 
 #define MAX_SIZE_STRING 1024
 void enterInLine();
-void save_simulation(OS* os);
+void save_simulation(OS* os, char* sched);
 
 OS os;
 int timer = 0;
@@ -21,7 +21,14 @@ int main(int argc, char** argv) {
 	system("rm -r -f temp");
 	system("mkdir temp");
 
-	print_message_e(1);
+	char* error = "Please choose a scheduler: Shortest Job First or Round Robin.\nRun \"./simulator ['sjf' or 'rr'] [quantum (only for rr)]\"\n\n";
+	if(argc<2) {printf("%s", error); return EXIT_SUCCESS;}
+
+	if( !strcmp(argv[1], "sjf") ) print_message_e(1);
+	else if( !strcmp(argv[1], "rr") ) {
+		if(argc!=3) {printf("%s", error); return EXIT_SUCCESS;}
+		print_message_e(0);
+	}
 
 	// Inserimento numero di core
 	core = gets_int(1, 16, 12);
@@ -35,9 +42,15 @@ int main(int argc, char** argv) {
 	// Inizializzazione OS
 	OS_init(&os);
 	scheduler_args srr_args;
+	
 	srr_args.core = core;
+	if( !strcmp(argv[1], "rr") ) srr_args.quantum = atoi(argv[2]);
+
 	os.schedule_args = &srr_args;
-	os.schedule_fn = schedulerSJF;
+	
+	if( !strcmp(argv[1], "sjf") ) os.schedule_fn = schedulerSJF;
+	if( !strcmp(argv[1], "rr") ) os.schedule_fn = schedulerRR;
+	
 	os.CPUs_utilization = (int*) calloc(core, sizeof(int));
 
 
@@ -237,12 +250,16 @@ int main(int argc, char** argv) {
 			char e = 1;
 			if(i==1){
 				e = 0;
-				save_simulation(&os);
+				save_simulation(&os, argv[1]);
 			}
 
 			printEscape_2("7;1;8", e); printf("**********************"); printEscape_2("28", e);
 			printf("SCHEDULER STATISTICS"); printEscape_2("8", e); 
 			printf("**********************"); printEscape_2("0", e);
+			printEscape_2("1", e);
+			if( !strcmp(argv[1], "sjf") ) printf("\nSHORTEST JOB FIRST");
+			if( !strcmp(argv[1], "rr") ) printf("\nROUND ROBIN");
+			printEscape_2("0", e);
 			printf("\n----------------------------------------------------------------\n");
 
 			// Total time
@@ -283,7 +300,7 @@ int main(int argc, char** argv) {
 			printEscape_2("1;48;5;234", e); printf("%.3f", (double)os.all_processes.size / timer); printEscape_2("0", e); printf("\n");
 			printf("----------------------------------------------------------------\n\n");
 			
-			if(i==1) freopen("/dev/tty", "w", stdout);
+			if(i==1) freopen("/dev/tty", "w", stdout); // ONLY LINUX
 			#undef _NO_ANSI
 		}
 	}
@@ -375,7 +392,7 @@ void enterInLine(){
 	}
 };
 
-void save_simulation(OS* os){
+void save_simulation(OS* os, char* sched){
 
 	char* path = (char*) malloc(MAX_SIZE_STRING);
 	strcpy(path, "./output/");
@@ -417,6 +434,8 @@ void save_simulation(OS* os){
 		free(procs_array[i]);
 	}
 
+	if( !strcmp(sched, "sjf") ) strcat(path, "SJF_");
+	if( !strcmp(sched, "rr") ) strcat(path, "RR_");
 	strcat(path, "statistics.txt");
 
 	freopen(path, "w+", stdout);

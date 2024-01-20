@@ -31,6 +31,7 @@ typedef struct OS{
 
 typedef struct {
 	int core;
+	int quantum;
 } scheduler_args;
 
 void OS_init(OS* os);

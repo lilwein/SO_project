@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "os.h"
-#include "scheduler_SJF.h"
+#include "scheduler.h"
 
 /*
 L'algoritmo Shortest Job First per la scelta del processo da eseguire consiste nello scegliere

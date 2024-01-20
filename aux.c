@@ -227,7 +227,12 @@ void printEscape_2(char* str, char escape){
 
 // Funzione ausiliaria di stampa a schermo
 void print_message_e(char type){
-	if(type==1){
+	if(type==0){
+		// 1: welcome
+		char* message = "\nWelcome to CPU Scheduler Simulator: Round Robin Preemptive Scheduler\n";
+		printEscape("1;4;7");	printf("%s", message); printEscape("0");
+	}
+	else if(type==1){
 		// 1: welcome
 		char* message = "\nWelcome to CPU Scheduler Simulator: Shortest Job First Preemptive Scheduler\n";
 		printEscape("1;4;7");	printf("%s", message); printEscape("0");
