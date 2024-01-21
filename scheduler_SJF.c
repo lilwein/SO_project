@@ -77,7 +77,10 @@ void schedulerSJF(OS* os, void* args_){
 		la durata rimasta.
 	*/
 	if ( e->duration > e->quantum ) { 
+
 		// printf("\nprocess (%d) hasn't done yet, CPU Burst event divided\n", ((PCB*)os->running.first)->pid );
+		pcb->stoppedByQuantum = 1;
+		
 		ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
 		qe->list.prev = 0;
 		qe->list.next = 0;

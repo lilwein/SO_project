@@ -73,6 +73,9 @@ void OS_createProcess(OS* os, Process* p) {
 	// PCB inizialmente non usato
 	new_pcb->usedThisTime = 0;
 
+	// PCB inizialmente non interrotto dal quantum
+	new_pcb->stoppedByQuantum = 0;
+
 	// Waiting time del processo inizialmente nullo
 	new_pcb->waitingTime = 0;
 
@@ -315,7 +318,7 @@ void OS_simStep(OS* os, int* timer){
 			// E' passata un'epoca: decremento della durata rimanente
 			// Process_save_file(pcb, "1");
 			e->duration --;
-			printf("\t\t\tremaining time: %d\n",e->duration);
+			printf("\t\t\tremaining quantum: %d\n",e->duration);
 
 			#ifdef _DEBUG
 				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
@@ -324,12 +327,21 @@ void OS_simStep(OS* os, int* timer){
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
 			// Se il CPU BURST è terminato,
 			if (e->duration == 0) {
-				printf("\t\t\tend CPU BURST for process (%d)\n", pcb->pid);
+				
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
 				free(e); // munmap_chunk(): invalid pointer
 
+			
+				if(pcb->stoppedByQuantum && pcb->events.first) {
+					printf("\t\t\t"); printEscape("30;1;48;5;142"); printf("end QUANTUM"); printEscape("0");
+					printf(" for process (%d):\n\t\t\t\tCPU Burst event has been split\n", ((PCB*)os->running.first)->pid );
+
+					pcb->stoppedByQuantum = 0;
+				}
+				else printf("\t\t\tend CPU BURST for process (%d)\n", pcb->pid);
+				
 				// Eliminazione del pcb dalla running list
 				List_detach(&os->running, (ListItem*)pcb);
 
@@ -359,6 +371,8 @@ void OS_simStep(OS* os, int* timer){
 						List_pushBack(&os->waiting, (ListItem*) pcb);
 						break;
 					}
+
+					// if(pcb->stoppedByQuantum) printf("\t\t\tend QUANTUM for process (%d): CPU Burst event has been split into two parts\n", ((PCB*)os->running.first)->pid );
 				}
 			}
 			/* A differenza del caso del caso precedente in cui un qualsiasi nuemero di processi possono

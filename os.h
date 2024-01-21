@@ -8,6 +8,7 @@ typedef struct {
 	ListHead events;
 
 	char usedThisTime;
+	char stoppedByQuantum;
 	int waitingTime;
 	int turnaroundTime;
 } PCB;
