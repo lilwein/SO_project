@@ -1,4 +1,5 @@
 # CPU Scheduler Simulator: preemptive scheduler con Shortest Job First e quantum prediction
+## Liwen Zheng
 
 L'algoritmo **`Shortest Job First`** per la scelta del processo da eseguire consiste nello scegliere il processo con il `minor CPU burst`, cioè quello che terrà meno occupata la CPU.
 Il limite di questo algoritmo sta nell'_impossibilità di conoscere il futuro comportamento di un processo_ e quindi di stabilirne i tempi di CPU e IO burst.
