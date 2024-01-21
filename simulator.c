@@ -423,7 +423,7 @@ void save_simulation(OS* os, SchedType sched){
 		PCB* pcb = (PCB*) aux;
 
 		char* proc = (char*) malloc(MAX_SIZE_STRING);
-		strcat(proc, "p");
+		strcpy(proc, "p");
 		char pid_str[PROC_MAX_LENGHT]; sprintf(pid_str, "%d", pcb->pid);
 		strcat(proc, pid_str);
 
