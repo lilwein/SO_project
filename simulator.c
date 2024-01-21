@@ -8,13 +8,18 @@
 #include "scheduler.h"
 
 #define MAX_SIZE_STRING 1024
+
+typedef enum {SJF=0, RR=1} SchedType;
+SchedType scheduler;
+
 void enterInLine();
-void save_simulation(OS* os, char* sched);
+void save_simulation(OS* os, SchedType sched);
 
 OS os;
 int timer = 0;
 int core;
 double decay;
+
 
 int main(int argc, char** argv) {
 	system("clear");
@@ -22,12 +27,21 @@ int main(int argc, char** argv) {
 	system("mkdir temp");
 
 	char* error = "Please choose a scheduler: Shortest Job First or Round Robin.\nRun \"./simulator ['sjf' or 'rr'] [quantum (only for rr)]\"\n\n";
-	if(argc<2) {printf("%s", error); return EXIT_SUCCESS;}
-
-	if( !strcmp(argv[1], "sjf") ) print_message_e(1);
-	else if( !strcmp(argv[1], "rr") ) {
-		if(argc!=3) {printf("%s", error); return EXIT_SUCCESS;}
-		print_message_e(0);
+	if(argc>=2) {
+		if( !strcmp(argv[1], "sjf") ) {
+			scheduler = SJF;
+			print_message_e(1);
+		}
+		else if( !strcmp(argv[1], "rr") ) {
+			if(argc!=3) {printf("%s", error); return EXIT_SUCCESS;}
+			scheduler = RR;
+			print_message_e(0);
+		}
+		else {printf("%s", error); return EXIT_SUCCESS;}
+	}
+	else if(argc==1) {
+		scheduler = SJF;
+		print_message_e(1);
 	}
 
 	// Inserimento numero di core
@@ -44,12 +58,12 @@ int main(int argc, char** argv) {
 	scheduler_args srr_args;
 	
 	srr_args.core = core;
-	if( !strcmp(argv[1], "rr") ) srr_args.quantum = atoi(argv[2]);
+	if( scheduler == RR ) srr_args.quantum = atoi(argv[2]);
 
 	os.schedule_args = &srr_args;
 	
-	if( !strcmp(argv[1], "sjf") ) os.schedule_fn = schedulerSJF;
-	if( !strcmp(argv[1], "rr") ) os.schedule_fn = schedulerRR;
+	if( scheduler == SJF ) os.schedule_fn = schedulerSJF;
+	if( scheduler == RR ) os.schedule_fn = schedulerRR;
 	
 	os.CPUs_utilization = (int*) calloc(core, sizeof(int));
 
@@ -250,15 +264,15 @@ int main(int argc, char** argv) {
 			char e = 1;
 			if(i==1){
 				e = 0;
-				save_simulation(&os, argv[1]);
+				save_simulation(&os, scheduler);
 			}
 
 			printEscape_2("7;1;8", e); printf("**********************"); printEscape_2("28", e);
 			printf("SCHEDULER STATISTICS"); printEscape_2("8", e); 
 			printf("**********************"); printEscape_2("0", e);
 			printEscape_2("1", e);
-			if( !strcmp(argv[1], "sjf") ) printf("\nSHORTEST JOB FIRST");
-			if( !strcmp(argv[1], "rr") ) printf("\nROUND ROBIN");
+			if( scheduler == SJF ) printf("\nSHORTEST JOB FIRST");
+			if( scheduler == RR ) printf("\nROUND ROBIN");
 			printEscape_2("0", e);
 			printf("\n----------------------------------------------------------------\n");
 
@@ -393,7 +407,7 @@ void enterInLine(){
 	}
 };
 
-void save_simulation(OS* os, char* sched){
+void save_simulation(OS* os, SchedType sched){
 
 	char* path = (char*) malloc(MAX_SIZE_STRING);
 	strcpy(path, "./output/");
@@ -435,8 +449,8 @@ void save_simulation(OS* os, char* sched){
 		free(procs_array[i]);
 	}
 
-	if( !strcmp(sched, "sjf") ) strcat(path, "SJF_");
-	if( !strcmp(sched, "rr") ) strcat(path, "RR_");
+	if( scheduler == SJF ) strcat(path, "SJF_");
+	if( scheduler == RR ) strcat(path, "RR_");
 	strcat(path, "statistics.txt");
 
 	freopen(path, "w+", stdout);
