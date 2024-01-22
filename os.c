@@ -70,6 +70,12 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->pid = p->pid;
 	new_pcb->events = p->events;
 
+	// Timer PCB inizialmente a zero
+	new_pcb->timer = 0;
+
+	// Non resettare il timer
+	new_pcb->resetTimer = 0;
+
 	// PCB inizialmente non usato
 	new_pcb->usedThisTime = 0;
 
@@ -221,10 +227,9 @@ void OS_simStep(OS* os, int* timer){
 			// Controlliamo che il pcb abbia l'evento di tipo IO
 			assert(e->type==IO);
 			
-			// E' passata un'epoca: decremento della durata rimanente
-			// Process_save_file(pcb, "1");
-			e->duration -- ;
-			printf("\t\t\tremaining time: %d\n",e->duration);
+			// E' passata un'epoca: incremento timer evento
+			e->timer ++;
+			printf("\t\t\tremaining time: %d\n", e->duration - e->timer);
 
 			#ifdef _DEBUG
 				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
@@ -232,9 +237,9 @@ void OS_simStep(OS* os, int* timer){
 			
 			// Se l'IO BURST non è terminato, si passa al prossimo processo
 			// Se l'IO BURST è terminato,
-			if (e->duration == 0) {
+			if (e->timer == e->duration) {
 				printf("\t\t\tend IO BURST for process (%d)\n", pcb->pid);
-				
+
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
 				free(e);
@@ -315,25 +320,37 @@ void OS_simStep(OS* os, int* timer){
 			// Controlliamo che il pcb abbia l'evento di tipo CPU
 			assert(e->type==CPU);
 
-			// E' passata un'epoca: decremento della durata rimanente
-			// Process_save_file(pcb, "1");
-			e->duration --;
-			printf("\t\t\tremaining quantum: %d\n",e->duration);
+			// E' passata un'epoca: incremento timer evento
+			e->timer ++;
+			printf("\t\t\tremaining quantum: %d\n", e->duration - e->timer);
+
+			/* pcb->timer è un timer che si azzera solo quando un evento e tutti gli eventi 
+			derivati da esso concludono. */
+			pcb->timer ++;
 
 			#ifdef _DEBUG
+				printf("\npcb->timer: %d\n", pcb->timer);
+				printf("\ne->timer: %d\n", e->timer);
 				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
 			#endif
 
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
 			// Se il CPU BURST è terminato,
-			if (e->duration == 0) {
+			if (e->timer == e->quantum || e->timer == e->duration) {
 				
+				/* pcb->timer si azzera poiché tutti gli eventi derivati dall'evento iniziale sono conclusi. 
+				Lo scheduler, assicuratosi di ciò, setta resetTimer = 1. */
+				if(pcb->resetTimer){
+					pcb->timer = 0;
+					pcb->resetTimer = 0;
+				}
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
 				List_popFront(&pcb->events);
 				free(e); // munmap_chunk(): invalid pointer
 
-			
+				/* Viene tolta la cpu al processo per la terminazione del quanto di tempo. 
+				Viene settato stoppedByQuantum = 1 dallo scheduler.*/
 				if(pcb->stoppedByQuantum && pcb->events.first) {
 					printf("\t\t\t"); printEscape("30;1;48;5;142"); printf("end QUANTUM"); printEscape("0");
 					printf(" for process (%d):\n\t\t\t\tCPU Burst event has been split\n", ((PCB*)os->running.first)->pid );
@@ -371,8 +388,6 @@ void OS_simStep(OS* os, int* timer){
 						List_pushBack(&os->waiting, (ListItem*) pcb);
 						break;
 					}
-
-					// if(pcb->stoppedByQuantum) printf("\t\t\tend QUANTUM for process (%d): CPU Burst event has been split into two parts\n", ((PCB*)os->running.first)->pid );
 				}
 			}
 			/* A differenza del caso del caso precedente in cui un qualsiasi nuemero di processi possono

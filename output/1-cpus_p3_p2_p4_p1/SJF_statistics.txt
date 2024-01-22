@@ -2,35 +2,31 @@
 SHORTEST JOB FIRST
 ----------------------------------------------------------------
 Number of CPUs:						1
-Number of processes:					6
-Number of CPU and IO bursts:				192
-Total time:						163
+Number of processes:					4
+Number of CPU and IO bursts:				80
+Total time:						58
 ----------------------------------------------------------------
 All created or loaded processes:
-	(3) (4) (2) (1) (6) (5) 
+	(3) (2) (4) (1) 
 ----------------------------------------------------------------
 Time that processes spent waiting in ready queue:
-	process (3):					8
-	process (4):					22
-	process (2):					35
+	process (3):					11
+	process (2):					29
+	process (4):					26
 	process (1):					37
-	process (6):					73
-	process (5):					72
-Average Waiting Time:					41.17
+Average Waiting Time:					25.75
 ----------------------------------------------------------------
 Time that OS spent to complete a process:
-	process (3):					20
-	process (4):					49
-	process (2):					55
+	process (3):					23
+	process (2):					49
+	process (4):					53
 	process (1):					58
-	process (6):					94
-	process (5):					163
-Average Turnaround Time:				73.17
+Average Turnaround Time:				45.75
 ----------------------------------------------------------------
 CPU Utilization for each core:
-	CPU 0:						90 %
-Average CPU Utilization:				90 %
+	CPU 0:						98 %
+Average CPU Utilization:				98 %
 ----------------------------------------------------------------
-Throughput (processes/time unit):			0.037
+Throughput (processes/time unit):			0.069
 ----------------------------------------------------------------
 

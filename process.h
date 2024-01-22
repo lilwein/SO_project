@@ -11,6 +11,7 @@ typedef struct {
 	int duration;
 	int quantum;
 	int next_prediction;
+	int timer;
 } ProcessEvent;
 
 typedef struct {

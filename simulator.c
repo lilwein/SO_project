@@ -59,6 +59,7 @@ int main(int argc, char** argv) {
 	
 	srr_args.core = core;
 	if( scheduler == RR ) srr_args.quantum = atoi(argv[2]);
+	srr_args.decay = decay;
 
 	os.schedule_args = &srr_args;
 	

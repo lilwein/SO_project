@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 #include "os.h"
 #include "scheduler.h"
 
@@ -29,7 +30,7 @@ Nel caso base, cioè quando un processo arriva, useremo la durata reale dell'eve
 */
 
 void schedulerSJF(OS* os, void* args_){
-	//scheduler_args* args = (scheduler_args*)args_;
+	scheduler_args* args = (scheduler_args*)args_;
 
 	// Si prende il primo processo dalla lista ready
 	ListItem* item = os->ready.first;
@@ -69,32 +70,53 @@ void schedulerSJF(OS* os, void* args_){
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
 	assert(e->type==CPU);
 
-	// printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+	#ifdef _DEBUG_SCHEDULER
+		printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+	#endif
 
 	/* Se la durata dell'evento supera quella del quantum prediction, si deve dividere l'evento in due eventi.
 		Il primo evento, qe, viene creato e differisce da quello originale poichè la sua durata equivale al
 		quantum prediction. Il secondo evento, che segue l'evento qe creato, è l'evento originale stesso ma con 
 		la durata rimasta.
 	*/
-	if ( e->duration > e->quantum ) { 
+	if ( e->duration > e->quantum ) {
 
-		// printf("\nprocess (%d) hasn't done yet, CPU Burst event divided\n", ((PCB*)os->running.first)->pid );
+		// Il pcb deve essere fermato dall'OS
 		pcb->stoppedByQuantum = 1;
 		
+		// Nuovo evento nato dalla scissione
 		ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
 		qe->list.prev = 0;
 		qe->list.next = 0;
 		qe->type = CPU;
+		qe->timer = 0;
 
 		qe->duration = e->quantum;
-		qe->quantum = e->next_prediction;
-		qe->next_prediction = e->next_prediction;
+		qe->quantum = e->quantum;
 
+		/* Timer che conta a partire dalla scissione dell'evento. 
+		pcb->timer avrà lo stesso valore di timerFromSplit nel momento in cui l'OS runnerà l'ultimo
+		evento CPU burst. Questo passaggio serve a sincronizzare lo shceduler con pcb->timer dato che viene
+		eseguito prima che l'OS elabori l'evento. */
+		int timerFromSplit = pcb->timer + qe->duration;
+		
+		double lpFilter = timerFromSplit * args->decay + qe->quantum * (1-args->decay);
+		qe->next_prediction = round(lpFilter);
+		
 		e->duration = e->duration - e->quantum;
-		e->quantum = e->next_prediction;
+		e->quantum = qe->next_prediction;
+		e->timer = 0;
 
+		// qe viene inserito in cima alla lista degli eventi
 		List_pushFront(&pcb->events, (ListItem*)qe);
+		
+		#ifdef _DEBUG_SCHEDULER
+			printf("\ntimerFromSplit: %d\tlpFilter: %f\tround: %f\tqe->np: %d\n", timerFromSplit, lpFilter, round(lpFilter), qe->next_prediction);
+		#endif
 	}
+
+	// Se la durata dell'evento è minore del quanto, si avvisa l'OS di resettare il pcb->timer
+	if(e->duration <= e->quantum) pcb->resetTimer = 1;
 };
 
 

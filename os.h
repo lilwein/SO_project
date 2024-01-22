@@ -7,6 +7,9 @@ typedef struct {
 	int pid;
 	ListHead events;
 
+	int timer;
+	char resetTimer;
+
 	char usedThisTime;
 	char stoppedByQuantum;
 	int waitingTime;
@@ -33,6 +36,7 @@ typedef struct OS{
 typedef struct {
 	int core;
 	int quantum;
+	double decay;
 } scheduler_args;
 
 void OS_init(OS* os);

@@ -47,6 +47,7 @@ int Process_load_file(Process* p, const char* filename) {
 			e->duration = duration;
 			e->quantum = -1;
 			e->next_prediction = -1;
+			e->timer = 0;
 			List_pushBack(&p->events, (ListItem*)e);
 			++num_events;
 			continue;
@@ -59,6 +60,7 @@ int Process_load_file(Process* p, const char* filename) {
 			e->type = IO;
 			e->duration = duration;
 			e->quantum = -1;
+			e->timer = 0;
 			e->next_prediction = -1;
 			List_pushBack(&p->events, (ListItem*)e);
 			++num_events;
