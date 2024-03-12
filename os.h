@@ -35,7 +35,7 @@ typedef struct OS{
 
 typedef struct {
 	int core;
-	int quantum;
+	int max_quantum;
 	double decay;
 } scheduler_args;
 

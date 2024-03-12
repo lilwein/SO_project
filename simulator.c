@@ -56,9 +56,12 @@ int main(int argc, char** argv) {
 	// Inizializzazione OS
 	OS_init(&os);
 	scheduler_args srr_args;
+
+	// max_quantum
+	srr_args.max_quantum = 5;
 	
 	srr_args.core = core;
-	if( scheduler == RR ) srr_args.quantum = atoi(argv[2]);
+	if( scheduler == RR ) srr_args.max_quantum = atoi(argv[2]);
 	srr_args.decay = decay;
 
 	os.schedule_args = &srr_args;
