@@ -66,7 +66,10 @@ int main(int argc, char** argv) {
 
 	os.schedule_args = &srr_args;
 	
-	if( scheduler == SJF ) os.schedule_fn = schedulerSJF;
+	if( scheduler == SJF ) {
+		os.schedule_fn = schedulerSJF;
+		os.schedule_fn_split = SJF_calculatePrediction;
+	}
 	if( scheduler == RR ) os.schedule_fn = schedulerRR;
 	
 	os.CPUs_utilization = (int*) calloc(core, sizeof(int));
@@ -147,7 +150,7 @@ int main(int argc, char** argv) {
 			processes_ok ++;
 			
 			// Calcolo dei quantum predtcion su TUTTI gli eventi
-			Process_CalculatePrediction(&new_process, decay, NULL);
+			// Process_CalculatePrediction(&new_process, decay, NULL);
 
 			// Ci sono eventi
 			if (num_events) {
@@ -376,7 +379,7 @@ void enterInLine(){
 			Process_load_inline(new_process_ptr, cpu_burst, io_burst);
 
 			// Calcolo dei quantum predtcion su TUTTI gli eventi
-			Process_CalculatePrediction(new_process_ptr, decay, NULL);
+			// Process_CalculatePrediction(new_process_ptr, decay, NULL);
 
 			printf("Loading new process with pid: %d, arrival time: %d\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
 			printf("Process with pid (%d) has %d events\n", new_process_ptr->pid, new_process_ptr->events.size);
@@ -398,7 +401,7 @@ void enterInLine(){
 			ProcessEvent* new_event = Process_load_inline(existing_process, cpu_burst, io_burst);
 
 			// Calcolo dei quantum predtcion A PARTIRE DALL'EVENTO NEW_EVENT
-			Process_CalculatePrediction(existing_process, decay, new_event);
+			// Process_CalculatePrediction(existing_process, decay, new_event);
 
 			printf("Loading new event with CPU_BURST: %d, IO_BURST: %d\n", cpu_burst, io_burst);
 			printf("Process with pid (%d) has now %d events\n", existing_process->pid, existing_process->events.size);

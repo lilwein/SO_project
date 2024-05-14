@@ -18,6 +18,7 @@ typedef struct {
 
 struct OS;
 typedef void (*ScheduleFn)(struct OS* os, void* args);
+typedef void (*ScheduleFn_split)(PCB* pcb, void* args_);
 
 typedef struct OS{
 	ListHead running;
@@ -25,6 +26,7 @@ typedef struct OS{
 	ListHead waiting;
 	int timer;
 	ScheduleFn schedule_fn;
+	ScheduleFn_split schedule_fn_split;
 	void* schedule_args;
 
 	ListHead processes;

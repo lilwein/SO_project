@@ -22,3 +22,5 @@ void print_message_e(char type);
 
 void changemode(int);
 int kbhit(void);
+
+double min(double a, double b);

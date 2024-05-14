@@ -410,3 +410,7 @@ int kbhit (void){
 	select(STDIN_FILENO+1, &rdfs, NULL, NULL, &tv);
 	return FD_ISSET(STDIN_FILENO, &rdfs);
 }
+
+double min(double a, double b){
+	return (a <= b)? a : b;
+}

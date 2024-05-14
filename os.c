@@ -322,7 +322,8 @@ void OS_simStep(OS* os, int* timer){
 
 			// E' passata un'epoca: incremento timer evento
 			e->timer ++;
-			printf("\t\t\tremaining quantum: %d\n", e->duration - e->timer);
+			// printf("\t\t\tremaining quantum: %d\n", e->duration - e->timer);
+			printf("\t\t\trunning for: %d\n", e->timer);
 
 			/* pcb->timer è un timer che si azzera solo quando un evento e tutti gli eventi 
 			derivati da esso concludono. */
@@ -335,9 +336,23 @@ void OS_simStep(OS* os, int* timer){
 			#endif
 
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
-			// Se il CPU BURST è terminato,
-			if (e->timer == e->quantum || e->timer == e->duration) {
+			// Se il CPU BURST è terminato o interrotto dal quanto,
+			if (e->timer == e->quantum || e->timer == args->max_quantum || e->timer == e->duration) {
 				
+				// Invocazione scheduler
+				(*os->schedule_fn_split) (pcb, os->schedule_args);
+
+				#ifdef _DEBUG
+					printf("\npcb->timer: %d\n", pcb->timer);
+					printf("\ne->timer: %d\n", e->timer);
+					printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+				#endif
+
+				// Eliminazione dell'evento dalla coda degli eventi del pcb
+				if(e->timer == e->duration) {
+					List_popFront(&pcb->events);
+				}
+
 				/* pcb->timer si azzera poiché tutti gli eventi derivati dall'evento iniziale sono conclusi. 
 				Lo scheduler, assicuratosi di ciò, setta resetTimer = 1. */
 				if(pcb->resetTimer){
@@ -345,8 +360,6 @@ void OS_simStep(OS* os, int* timer){
 					pcb->resetTimer = 0;
 				}
 
-				// Eliminazione dell'evento dalla coda degli eventi del pcb
-				List_popFront(&pcb->events);
 				free(e); // munmap_chunk(): invalid pointer
 
 				/* Viene tolta la cpu al processo per la terminazione del quanto di tempo. 
