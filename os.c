@@ -309,7 +309,7 @@ void OS_simStep(OS* os, int* timer){
 			runProcessTime++;
 
 			#ifdef _DEBUG
-				printPidListsDebug(os, 5);
+				printPidListsDebug(os, 5); printf("\n");
 			#endif
 			
 			printf("\t\trunning process: ");
@@ -330,8 +330,8 @@ void OS_simStep(OS* os, int* timer){
 			pcb->timer ++;
 
 			#ifdef _DEBUG
-				printf("\npcb->timer: %d\n", pcb->timer);
-				printf("\ne->timer: %d\n", e->timer);
+				printf("\npcb->timer: %d", pcb->timer);
+				printf("\ne->timer: %d", e->timer);
 				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
 			#endif
 
@@ -343,9 +343,9 @@ void OS_simStep(OS* os, int* timer){
 				(*os->schedule_fn_split) (pcb, os->schedule_args);
 
 				#ifdef _DEBUG
-					printf("\npcb->timer: %d\n", pcb->timer);
-					printf("\ne->timer: %d\n", e->timer);
-					printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+					printf("\npcb->timer: %d", pcb->timer);
+					printf("\ne->timer: %d", e->timer);
+					printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n\n", e->duration, e->quantum, e->next_prediction);
 				#endif
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb

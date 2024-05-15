@@ -160,6 +160,7 @@ ProcessEvent* Process_load_inline(Process* p, int cpu_burst, int io_burst) {
 	e_CPU->duration = cpu_burst;
 	e_CPU->quantum = -1;
 	e_CPU->next_prediction = -1;
+	e_CPU->timer = 0;
 	List_pushBack(&p->events, (ListItem*)e_CPU);
 
 	ProcessEvent* e_IO = (ProcessEvent*) malloc(sizeof(ProcessEvent));
@@ -169,6 +170,7 @@ ProcessEvent* Process_load_inline(Process* p, int cpu_burst, int io_burst) {
 	e_IO->duration = io_burst;
 	e_IO->quantum = -1;
 	e_IO->next_prediction = -1;
+	e_IO->timer = 0;
 	List_pushBack(&p->events, (ListItem*)e_IO);
 
 	return e_CPU;
