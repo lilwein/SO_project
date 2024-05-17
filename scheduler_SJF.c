@@ -139,8 +139,12 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 		}
 		else {
 			// Calcolo previsione del prossimo burst
-			double lpFilter = pcb->timer * args->decay + e->quantum * (1-args->decay);
-			e->next_prediction = round(lpFilter);
+			double lpFilter;
+			if(pcb->last_cpu_burst == -1) e->next_prediction = pcb->timer;
+			else {
+				lpFilter = pcb->timer * args->decay + pcb->last_cpu_burst * (1-args->decay);
+				e->next_prediction = round(lpFilter);
+			}
 		}
 
 		// Selezione dell'evento CPU successivo e inizializzazione del quanto
@@ -154,6 +158,9 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 				break;
 			}
 		}
+
+		// 
+		pcb->last_cpu_burst = e->next_prediction;
 
 		// Lo scheduler avvisa l'OS di resettare il pcb->timer
 		pcb->resetTimer = 1;

@@ -10,6 +10,8 @@ typedef struct {
 	int timer;
 	char resetTimer;
 
+	int last_cpu_burst;
+
 	char usedThisTime;
 	char stoppedByQuantum;
 	int waitingTime;

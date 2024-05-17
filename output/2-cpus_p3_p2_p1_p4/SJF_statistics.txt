@@ -11,17 +11,17 @@ All created or loaded processes:
 ----------------------------------------------------------------
 Time that processes spent waiting in ready queue:
 	process (3):					3
-	process (2):					5
+	process (2):					4
 	process (1):					7
 	process (4):					5
-Average Waiting Time:					5.00
+Average Waiting Time:					4.75
 ----------------------------------------------------------------
 Time that OS spent to complete a process:
 	process (3):					15
-	process (2):					28
+	process (2):					27
 	process (1):					31
 	process (4):					34
-Average Turnaround Time:				27.00
+Average Turnaround Time:				26.75
 ----------------------------------------------------------------
 CPU Utilization for each core:
 	CPU 0:						85 %

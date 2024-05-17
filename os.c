@@ -76,6 +76,9 @@ void OS_createProcess(OS* os, Process* p) {
 	// Non resettare il timer
 	new_pcb->resetTimer = 0;
 
+	// Nessun CPU burst passato
+	new_pcb->last_cpu_burst = -1;
+
 	// PCB inizialmente non usato
 	new_pcb->usedThisTime = 0;
 
