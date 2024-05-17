@@ -132,12 +132,16 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 	// Burst finito
 	if(e->timer == e->duration) {
 
-		// Caso di un processo alla prima run
-		if(e->quantum==-1) e->quantum = e->timer;
-		
-		// Calcolo previsione del prossimo burst
-		double lpFilter = pcb->timer * args->decay + e->quantum * (1-args->decay);
-		e->next_prediction = round(lpFilter);
+		// Caso di una run del primo CPU burst di un processo
+		if(e->quantum==-1) {
+			e->quantum = e->timer;
+			e->next_prediction = pcb->timer;
+		}
+		else {
+			// Calcolo previsione del prossimo burst
+			double lpFilter = pcb->timer * args->decay + e->quantum * (1-args->decay);
+			e->next_prediction = round(lpFilter);
+		}
 
 		// Selezione dell'evento CPU successivo e inizializzazione del quanto
 		ListItem* aux = pcb->events.first->next;
@@ -200,6 +204,7 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 	in waiting) nell'epoca corrente.
 	Se tutti i processi hanno il prossimo evento con quantum = -1 (come succede all'inizio della simulazione),
 	verrà selezionato il primo processo in coda.
+	A parità di quantum, viene selezionato il pcb più "a sinistra" della lista ready, cioè quello in attesa da più tempo.
 	Restituisce NULL se nessun processo ha soddisfatto la precedente condizione.
 */
 PCB* shortestJobPCB (ListItem* item){
@@ -216,7 +221,10 @@ PCB* shortestJobPCB (ListItem* item){
 	}
 
 	ProcessEvent* next_e = (ProcessEvent*) next_pcb->events.first;
+
+	printf("\n\ne->quantum: %d\tnext_e->quantum: %d\n", e->quantum,next_e->quantum);
 	if( e->quantum <= next_e->quantum) {
+		printf("e->quantum <= next_e->quantum\n");
 		if( e->quantum > 0 ) return pcb;
 		if( next_e->quantum > 0 ) return next_pcb;
 		return pcb;

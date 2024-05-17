@@ -165,7 +165,7 @@ void OS_simStep(OS* os, int* timer){
 	for(int i=0; i<core; i++){
 		printf("----------------------------------------------------------------\n");
 		printEscape("1;3;7"); printf("\tCORE %d \n", i+1); printEscape("0");
-		#ifdef _DEBUG
+		#ifdef _DEBUG_PROCESS_LISTS
 			printPidListsDebug(os, 1);
 		#endif
 
@@ -189,7 +189,7 @@ void OS_simStep(OS* os, int* timer){
 			(*os->schedule_fn) (os, os->schedule_args);
 		}
 
-		#ifdef _DEBUG
+		#ifdef _DEBUG_PROCESS_LISTS
 			printPidListsDebug(os, 2);
 		#endif
 
@@ -214,7 +214,7 @@ void OS_simStep(OS* os, int* timer){
 				considerazione dagli altri core. */
 			pcb->usedThisTime = 1;
 
-			#ifdef _DEBUG
+			#ifdef _DEBUG_PROCESS_LISTS
 				printf("in waiting while: pid (%d)\n", pcb->pid);
 				printPidListsDebug(os, 3);
 			#endif
@@ -277,7 +277,7 @@ void OS_simStep(OS* os, int* timer){
 			}
 		}
 
-		#ifdef _DEBUG
+		#ifdef _DEBUG_PROCESS_LISTS
 			printPidListsDebug(os, 4);
 		#endif
 
@@ -292,7 +292,7 @@ void OS_simStep(OS* os, int* timer){
 				analizzare gli altri eventuali processi in running. */
 			if(pcb->usedThisTime) continue;
 
-			#ifdef _DEBUG
+			#ifdef _DEBUG_PROCESS_LISTS
 				printf("in running while: pid (%d)\n", pcb->pid);
 			#endif
 
@@ -308,7 +308,7 @@ void OS_simStep(OS* os, int* timer){
 			runPids[runProcessTime] = pcb->pid;
 			runProcessTime++;
 
-			#ifdef _DEBUG
+			#ifdef _DEBUG_PROCESS_LISTS
 				printPidListsDebug(os, 5); printf("\n");
 			#endif
 			
@@ -409,7 +409,7 @@ void OS_simStep(OS* os, int* timer){
 			break;
 		}
 
-		#ifdef _DEBUG
+		#ifdef _DEBUG_PROCESS_LISTS
 			printPidListsDebug(os, 6);
 		#endif
 	} // FINE CICLO CORE
