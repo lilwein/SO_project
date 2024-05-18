@@ -72,7 +72,7 @@ void schedulerSJF(OS* os, void* args_){
 	assert(e->type==CPU);
 
 	#ifdef _DEBUG_SCHEDULER
-		printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+		printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n", e->duration, e->quantum, e->next_prediction);
 	#endif
 
 	// /* Se la durata dell'evento supera quella del quantum prediction, si deve dividere l'evento in due eventi.
@@ -139,11 +139,10 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 		}
 		else {
 			// Calcolo previsione del prossimo burst
-			double lpFilter;
 			if(pcb->last_cpu_burst == -1) e->next_prediction = pcb->timer;
 			else {
-				lpFilter = pcb->timer * args->decay + pcb->last_cpu_burst * (1-args->decay);
-				e->next_prediction = round(lpFilter);
+				double lpFilter = pcb->timer * args->decay + pcb->last_cpu_burst * (1-args->decay);
+				e->next_prediction = lpFilter;
 			}
 		}
 
@@ -186,7 +185,7 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 		
 		// Calcolo previsione del prossimo burst
 		double lpFilter = pcb->timer * args->decay + e->quantum * (1-args->decay);
-		e->next_prediction = round(lpFilter);
+		e->next_prediction = lpFilter;
 
 		// Inizializzazione del quanto per l'evento con il burst rimanente
 		qe->quantum = e->next_prediction;
@@ -196,10 +195,6 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 
 		// qe viene inserito in cima alla lista degli eventi
 		List_pushFront(&pcb->events, (ListItem*)qe);
-		
-		#ifdef _DEBUG_SCHEDULER
-			printf("\ntimerFromSplit: %d\tlpFilter: %f\tround: %f\tqe->np: %d\n", timerFromSplit, lpFilter, round(lpFilter), qe->next_prediction);
-		#endif
 	}
 
 }
@@ -228,10 +223,12 @@ PCB* shortestJobPCB (ListItem* item){
 	}
 
 	ProcessEvent* next_e = (ProcessEvent*) next_pcb->events.first;
+	
+	#ifdef _DEBUG_SCHEDULER
+		printf("\n\ne->quantum: %.2f\tnext_e->quantum: %.2f\n", e->quantum,next_e->quantum);
+	#endif
 
-	printf("\n\ne->quantum: %d\tnext_e->quantum: %d\n", e->quantum,next_e->quantum);
 	if( e->quantum <= next_e->quantum) {
-		printf("e->quantum <= next_e->quantum\n");
 		if( e->quantum > 0 ) return pcb;
 		if( next_e->quantum > 0 ) return next_pcb;
 		return pcb;

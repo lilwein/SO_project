@@ -8,9 +8,11 @@ typedef enum {CPU=0, IO=1} ResourceType;
 typedef struct {
 	ListItem list;
 	ResourceType type;
+
 	int duration;
-	int quantum;
-	int next_prediction;
+	double quantum;
+	double next_prediction;
+	
 	int timer;
 } ProcessEvent;
 

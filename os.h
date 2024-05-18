@@ -1,6 +1,7 @@
 #pragma once
 #include "linked_list.h"
 #include "process.h"
+#include "math.h"
 
 typedef struct {
 	ListItem list;
@@ -10,7 +11,7 @@ typedef struct {
 	int timer;
 	char resetTimer;
 
-	int last_cpu_burst;
+	double last_cpu_burst;
 
 	char usedThisTime;
 	char stoppedByQuantum;

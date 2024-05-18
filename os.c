@@ -232,10 +232,10 @@ void OS_simStep(OS* os, int* timer){
 			
 			// E' passata un'epoca: incremento timer evento
 			e->timer ++;
-			printf("\t\t\tremaining time: %d\n", e->duration - e->timer);
+			printf("\t\t\tIO burst for: %d epochs\n", e->timer);
 
 			#ifdef _DEBUG
-				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+				printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n", e->duration, e->quantum, e->next_prediction);
 			#endif
 			
 			// Se l'IO BURST non è terminato, si passa al prossimo processo
@@ -326,7 +326,7 @@ void OS_simStep(OS* os, int* timer){
 			// E' passata un'epoca: incremento timer evento
 			e->timer ++;
 			// printf("\t\t\tremaining quantum: %d\n", e->duration - e->timer);
-			printf("\t\t\trunning for: %d\n", e->timer);
+			printf("\t\t\trunning for: %d epochs\n", e->timer);
 
 			/* pcb->timer è un timer che si azzera solo quando un evento e tutti gli eventi 
 			derivati da esso concludono. */
@@ -335,12 +335,12 @@ void OS_simStep(OS* os, int* timer){
 			#ifdef _DEBUG
 				printf("\npcb->timer: %d", pcb->timer);
 				printf("\ne->timer: %d", e->timer);
-				printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n", e->duration, e->quantum, e->next_prediction);
+				printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n", e->duration, e->quantum, e->next_prediction);
 			#endif
 
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
 			// Se il CPU BURST è terminato o interrotto dal quanto,
-			if (e->timer == e->quantum || e->timer == args->max_quantum || e->timer == e->duration) {
+			if (e->timer == round(e->quantum) || e->timer == args->max_quantum || e->timer == e->duration) {
 				
 				// Invocazione scheduler
 				(*os->schedule_fn_split) (pcb, os->schedule_args);
@@ -348,7 +348,7 @@ void OS_simStep(OS* os, int* timer){
 				#ifdef _DEBUG
 					printf("\npcb->timer: %d", pcb->timer);
 					printf("\ne->timer: %d", e->timer);
-					printf("\nduration: %d\tquantum: %d\tnextprediction: %d\n\n", e->duration, e->quantum, e->next_prediction);
+					printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n\n", e->duration, e->quantum, e->next_prediction);
 				#endif
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
