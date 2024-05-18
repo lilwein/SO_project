@@ -77,7 +77,7 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->resetTimer = 0;
 
 	// Nessun CPU burst passato
-	new_pcb->last_cpu_burst = -1;
+	new_pcb->last_prediction = -1;
 
 	// PCB inizialmente non usato
 	new_pcb->usedThisTime = 0;
@@ -325,18 +325,25 @@ void OS_simStep(OS* os, int* timer){
 
 			// E' passata un'epoca: incremento timer evento
 			e->timer ++;
-			// printf("\t\t\tremaining quantum: %d\n", e->duration - e->timer);
 			printf("\t\t\trunning for: %d epochs\n", e->timer);
 
 			/* pcb->timer è un timer che si azzera solo quando un evento e tutti gli eventi 
 			derivati da esso concludono. */
 			pcb->timer ++;
+			printf("\t\t\tCPU burst for: %d epochs\n", pcb->timer);
 
 			#ifdef _DEBUG
 				printf("\npcb->timer: %d", pcb->timer);
 				printf("\ne->timer: %d", e->timer);
-				printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n", e->duration, e->quantum, e->next_prediction);
+				printf("\nduration: %d", e->duration);
+				printf("\nquantum: %.2f\tnextprediction: %.2f\n", e->quantum, e->next_prediction);
 			#endif
+
+			if(e->quantum != -1) {
+				printf("\t\t\tquantum: %.2f", e->quantum);
+				if(e->quantum > args->max_quantum) printf(" (N.B. max quantum: %d)", args->max_quantum);
+				printf("\n");
+			}
 
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
 			// Se il CPU BURST è terminato o interrotto dal quanto,
@@ -345,10 +352,13 @@ void OS_simStep(OS* os, int* timer){
 				// Invocazione scheduler
 				(*os->schedule_fn_split) (pcb, os->schedule_args);
 
+				printf("\t\t\tnextprediction: %.2f\n", e->next_prediction);
+
 				#ifdef _DEBUG
 					printf("\npcb->timer: %d", pcb->timer);
 					printf("\ne->timer: %d", e->timer);
-					printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n\n", e->duration, e->quantum, e->next_prediction);
+					printf("\nduration: %d", e->duration);
+					printf("\nquantum: %.2f\tnextprediction: %.2f\n", e->quantum, e->next_prediction);
 				#endif
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
@@ -368,8 +378,10 @@ void OS_simStep(OS* os, int* timer){
 				/* Viene tolta la cpu al processo per la terminazione del quanto di tempo. 
 				Viene settato stoppedByQuantum = 1 dallo scheduler.*/
 				if(pcb->stoppedByQuantum && pcb->events.first) {
-					printf("\t\t\t"); printEscape("30;1;48;5;142"); printf("end QUANTUM"); printEscape("0");
-					printf(" for process (%d):\n\t\t\t\tCPU Burst event has been split\n", ((PCB*)os->running.first)->pid );
+					printf("\t\t\t"); printEscape("30;1;48;5;142"); 
+					if(e->quantum >= args->max_quantum) printf("end MAX QUANTUM"); 
+					else printf("end QUANTUM");
+					printEscape("0"); printf(" for process (%d):\n\t\t\t\tCPU Burst event has been split\n", ((PCB*)os->running.first)->pid );
 
 					pcb->stoppedByQuantum = 0;
 				}

@@ -148,9 +148,6 @@ int main(int argc, char** argv) {
 			}
 			// File trovato
 			processes_ok ++;
-			
-			// Calcolo dei quantum predtcion su TUTTI gli eventi
-			// Process_CalculatePrediction(&new_process, decay, NULL);
 
 			// Ci sono eventi
 			if (num_events) {
@@ -227,6 +224,10 @@ int main(int argc, char** argv) {
 
 	// Numero di salti in avanti
 	int steps;
+
+	printEscape("7;1;8"); printf("\n****************"); printEscape("28");
+	printf("Maximum value for the quantum: %d", srr_args.max_quantum);
+	printEscape("8"); printf("****************\n"); printEscape("0");
 
 	while(1) {
 		if(bar){
@@ -378,9 +379,6 @@ void enterInLine(){
 			// Aggiunta dei due eventi al processo
 			Process_load_inline(new_process_ptr, cpu_burst, io_burst);
 
-			// Calcolo dei quantum predtcion su TUTTI gli eventi
-			// Process_CalculatePrediction(new_process_ptr, decay, NULL);
-
 			printf("Loading new process with pid: %d, arrival time: %d\nLoading new event with CPU_BURST: %d, IO_BURST: %d\n", new_process.pid, new_process.arrival_time, cpu_burst, io_burst);
 			printf("Process with pid (%d) has %d events\n", new_process_ptr->pid, new_process_ptr->events.size);
 			List_pushBack(&os.processes, (ListItem*)new_process_ptr);
@@ -399,9 +397,6 @@ void enterInLine(){
 			
 			// Aggiunta dei due eventi al processo: new_event punta al primo evento (CPU)
 			ProcessEvent* new_event = Process_load_inline(existing_process, cpu_burst, io_burst);
-
-			// Calcolo dei quantum predtcion A PARTIRE DALL'EVENTO NEW_EVENT
-			// Process_CalculatePrediction(existing_process, decay, new_event);
 
 			printf("Loading new event with CPU_BURST: %d, IO_BURST: %d\n", cpu_burst, io_burst);
 			printf("Process with pid (%d) has now %d events\n", existing_process->pid, existing_process->events.size);

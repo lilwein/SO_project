@@ -11,7 +11,7 @@ typedef struct {
 	int timer;
 	char resetTimer;
 
-	double last_cpu_burst;
+	double last_prediction;
 
 	char usedThisTime;
 	char stoppedByQuantum;

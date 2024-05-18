@@ -30,8 +30,11 @@ Per integrare il concetto di preemption con lo SJB, andremo a predire il prossim
 Nel caso base, cioè quando un processo arriva, useremo la durata reale dell'evento come quantum prediction.
 */
 
+/* La funzione schedulerSJF() viene chiamata dall'OS per individuare il PCB in coda ready con il minor CPU 
+	burst previsto. Il PCB viene dunque inserito nella coda dei processi in running.
+*/
 void schedulerSJF(OS* os, void* args_){
-	scheduler_args* args = (scheduler_args*)args_;
+	// scheduler_args* args = (scheduler_args*)args_;
 
 	// Si prende il primo processo dalla lista ready
 	ListItem* item = os->ready.first;
@@ -44,9 +47,8 @@ void schedulerSJF(OS* os, void* args_){
 		return;
 	}
 
-	/* Se la lista ready non è vuota, viene individuato il processo il cui prossimo evento CPU burst ha mino
-	durata attraverso la funzione shortestJobPCB()
-	*/
+	/* Se la lista ready non è vuota, viene individuato il processo il cui prossimo evento CPU burst ha minor
+		durata attraverso la funzione shortestJobPCB(). */
 	PCB* pcb = (PCB*) malloc(sizeof(PCB));
 	pcb = shortestJobPCB(item);
 
@@ -65,7 +67,15 @@ void schedulerSJF(OS* os, void* args_){
 	// Il pcb con l'evento più breve viene tolto dalla ready list e viene aggiunto alla running list
 	List_detach( &(os->ready), (ListItem*) pcb);
 	List_pushBack( &(os->running), (ListItem*) pcb);
-	
+};
+
+
+/* La funzione SJF_calculatePrediction() viene chiamata dall'OS per gestire i casi in cui il CPU burst termina
+	o supera la durata del quanto.
+*/
+void SJF_calculatePrediction(PCB* pcb, void* args_) {
+	scheduler_args* args = (scheduler_args*)args_;
+
 	// Controlli sul prossimo evento
 	assert(pcb->events.first);
 	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
@@ -75,73 +85,28 @@ void schedulerSJF(OS* os, void* args_){
 		printf("\nduration: %d\tquantum: %.2f\tnextprediction: %.2f\n", e->duration, e->quantum, e->next_prediction);
 	#endif
 
-	// /* Se la durata dell'evento supera quella del quantum prediction, si deve dividere l'evento in due eventi.
-	// 	Il primo evento, qe, viene creato e differisce da quello originale poichè la sua durata equivale al
-	// 	quantum prediction. Il secondo evento, che segue l'evento qe creato, è l'evento originale stesso ma con 
-	// 	la durata rimasta.
-	// */
-	// if ( e->duration > e->quantum ) {
-
-	// 	// Il pcb deve essere fermato dall'OS
-	// 	pcb->stoppedByQuantum = 1;
-		
-	// 	// Nuovo evento nato dalla scissione
-	// 	ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
-	// 	qe->list.prev = 0;
-	// 	qe->list.next = 0;
-	// 	qe->type = CPU;
-	// 	qe->timer = 0;
-
-	// 	qe->duration = e->quantum;
-	// 	qe->quantum = e->quantum;
-
-	// 	/* Timer che conta a partire dalla scissione dell'evento. 
-	// 	pcb->timer avrà lo stesso valore di timerFromSplit nel momento in cui l'OS runnerà l'ultimo
-	// 	evento CPU burst. Questo passaggio serve a sincronizzare lo shceduler con pcb->timer dato che viene
-	// 	eseguito prima che l'OS elabori l'evento. */
-	// 	int timerFromSplit = pcb->timer + qe->duration;
-		
-	// 	double lpFilter = timerFromSplit * args->decay + qe->quantum * (1-args->decay);
-	// 	qe->next_prediction = round(lpFilter);
-		
-	// 	e->duration = e->duration - e->quantum;
-	// 	e->quantum = qe->next_prediction;
-	// 	e->timer = 0;
-
-	// 	// qe viene inserito in cima alla lista degli eventi
-	// 	List_pushFront(&pcb->events, (ListItem*)qe);
-		
-	// 	#ifdef _DEBUG_SCHEDULER
-	// 		printf("\ntimerFromSplit: %d\tlpFilter: %f\tround: %f\tqe->np: %d\n", timerFromSplit, lpFilter, round(lpFilter), qe->next_prediction);
-	// 	#endif
-	// }
-
-	// // Se la durata dell'evento è minore del quanto, si avvisa l'OS di resettare il pcb->timer
-	// if(e->duration <= e->quantum) pcb->resetTimer = 1;
-};
-
-
-void SJF_calculatePrediction(PCB* pcb, void* args_) {
-	scheduler_args* args = (scheduler_args*)args_;
-
-	// Controlli sul prossimo evento
-	assert(pcb->events.first);
-	ProcessEvent* e = (ProcessEvent*)pcb->events.first;
-	assert(e->type==CPU);
-
-	// Burst finito
+	/* Caso di CPU burst finito:
+		Quando un evento di tipo CPU burst termina, viene calcolata la predizione per il prossimo CPU burst e 
+		la si pone come valore del quanto per il prossimo CPU burst. */
 	if(e->timer == e->duration) {
 
-		// Caso di una run del primo CPU burst di un processo
+		// Caso del primo CPU burst di un processo
 		if(e->quantum==-1) {
 			e->quantum = e->timer;
 			e->next_prediction = pcb->timer;
 		}
+
+		// Caso dei successivi CPU burst di un processo o ripresa del primo CPU burst
 		else {
-			// Calcolo previsione del prossimo burst
-			if(pcb->last_cpu_burst == -1) e->next_prediction = pcb->timer;
+			// Caso di ripresa del primo CPU burst, interrotto precedentemente dal quanto
+			if(pcb->last_prediction == -1) e->next_prediction = pcb->timer;
+
+			// Caso di CPU burst successivi al primo
 			else {
-				double lpFilter = pcb->timer * args->decay + pcb->last_cpu_burst * (1-args->decay);
+				/* Calcolo previsione del prossimo burst:
+					Viene applicato il filtro passa basso tra il tempo totale misurato per la terminazione
+					completa del CPU burst e il tempo previsto alla fine dello scorso CPU burst. */
+				double lpFilter = pcb->timer * args->decay + pcb->last_prediction * (1-args->decay);
 				e->next_prediction = lpFilter;
 			}
 		}
@@ -153,37 +118,52 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 			if(next_e->type==IO) aux = aux->next;
 			else{
 				assert(next_e->type==CPU);
+
+				// Il quanto del CPU burst successivo è pari alla previsione fatta nell'epoca corrente
 				next_e->quantum = e->next_prediction;
 				break;
 			}
 		}
 
-		// 
-		pcb->last_cpu_burst = e->next_prediction;
+		/* La previsione fatta nell'epoca corrente viene salvata in pcb->last_prediction al fine di
+			poter essere riutilizzata in futuro per il calcolo delle previsioni.*/
+		pcb->last_prediction = e->next_prediction;
 
 		// Lo scheduler avvisa l'OS di resettare il pcb->timer
 		pcb->resetTimer = 1;
 	}
-
-	// Burst interrotto dal quanto o dal max_quantum
+	
+	/* Caso di CPU burst interrotto dal quanto (o max_quantum):
+		Se un evento è in running da più tempo del valore del quanto (o max_quantum) viene interrotto 
+		dallo scheduler. Verrà creato un nuovo evento di tipo CPU burst avente come durata la durata rimanente
+		del burst interrotto. */
 	else {
 		pcb->stoppedByQuantum = 1;
 			
-		// Nuovo evento nato dalla scissione
+		// Creazione di un nuovo evento con la durata del CPU burst interrotto
 		ProcessEvent* qe = (ProcessEvent*)malloc(sizeof(ProcessEvent));
 		qe->list.prev = 0;
 		qe->list.next = 0;
 		qe->type = CPU;
 		qe->timer = 0;
 
-		// Caso di un processo alla prima run
+		// Caso del primo CPU burst di un processo
 		if(e->quantum==-1) e->quantum = e->timer;
 
 		/* Operazione sconosciuta allo scheduler: la sua unica funzionalità
-			è di rendere noto il momento in cui termina un CPU burst. */
+			è di rendere noto il momento in cui termina un CPU burst. 	
+		####################################### */
 		qe->duration = e->duration - e->timer;
+		/* #################################### */
 		
-		// Calcolo previsione del prossimo burst
+		/* Calcolo previsione del prossimo burst:
+			Viene applicato il filtro passa basso tra il tempo totale misurato per la terminazione
+			completa del CPU burst e il quanto di tempo corrente.
+			Se quest'ultimo equivale a -1, caso del primo CPU burst di un processo, abbiamo provveduto
+			a settarlo ad un valore pari a e->timer.
+
+		Questa operazione ha come scopo quello di minimizzare le interruzioni del CPU burst quando vi 
+			sono dei notevoli aumenti da un burst all'altro. */
 		double lpFilter = pcb->timer * args->decay + e->quantum * (1-args->decay);
 		e->next_prediction = lpFilter;
 
@@ -228,6 +208,10 @@ PCB* shortestJobPCB (ListItem* item){
 		printf("\n\ne->quantum: %.2f\tnext_e->quantum: %.2f\n", e->quantum,next_e->quantum);
 	#endif
 
+	/* A parità di quanto, viene selezionato quello corrispondente al PCB più "a sinistra" della coda, cioè
+		quello non utilizzato da più tempo. 
+	Se ci sono eventi con quanto pari a -1, corrispondenti a PCB appena creati, viene scelto 
+		il PCB già esistente. */
 	if( e->quantum <= next_e->quantum) {
 		if( e->quantum > 0 ) return pcb;
 		if( next_e->quantum > 0 ) return next_pcb;
