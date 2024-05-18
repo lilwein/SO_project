@@ -26,7 +26,7 @@ Nel caso in cui un evento di tipo CPU venga interrotto una o più volte, perchè
 lpFilter = pcb->timer_CPU_burst * args->decay + e->quantum * (1-args->decay)
 ```
 In altri termini, viene applicato il filtro passa basso tra il **tempo che l'intero evento CPU sta impiegando per concludere** e il **quanto di tempo corrente**.
-Se quest'ultimo equivale a -1, caso del primo CPU burst di un processo, viene settato al valore di *max_quantum* poichè è stato interrotto da quest'ultimo.
+Se quest'ultimo equivale a -1, come nel caso del primo CPU burst di un processo, viene settato al valore di *max_quantum* poichè è stato interrotto da quest'ultimo.
 Questa operazione ha come scopo quello di minimizzare le interruzioni del CPU burst quando vi sono dei notevoli aumenti da un burst all'altro.
 
 Prendiamo ad esempio il ***processo p1*** contenuto nel file */processes/pi.txt*:
@@ -49,7 +49,7 @@ Introduciamo le seguenti variabili:
 + ***`pcb->last_prediction`***: viene salvato il valore dell'ultima predizione fatta per ogni CPU burst totale.
 
   
-Supponendo che ci sia solo questo processo da eseguire, che il *coefficiente di decay* sia pari a ***`decay=0.5`*** e che ***`max_quantum=5`***, il flusso del kernel sarà:
+Supponendo che ci sia solo questo processo da eseguire e che il *coefficiente di decay* sia pari a ***`decay=0.5`*** e ***`max_quantum=5`***, il flusso del kernel sarà:
 
 | p1, TIME | BURST | QUANTUM | E->TIMER | PCB->TIMER_CPU_BURST | E->NEXT_PRED | PCB_LAST_PRED |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
