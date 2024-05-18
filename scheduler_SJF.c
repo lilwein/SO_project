@@ -93,20 +93,20 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 		// Caso del primo CPU burst di un processo
 		if(e->quantum==-1) {
 			e->quantum = e->timer;
-			e->next_prediction = pcb->timer;
+			e->next_prediction = pcb->timer_CPU_burst;
 		}
 
 		// Caso dei successivi CPU burst di un processo o ripresa del primo CPU burst
 		else {
 			// Caso di ripresa del primo CPU burst, interrotto precedentemente dal quanto
-			if(pcb->last_prediction == -1) e->next_prediction = pcb->timer;
+			if(pcb->last_prediction == -1) e->next_prediction = pcb->timer_CPU_burst;
 
 			// Caso di CPU burst successivi al primo
 			else {
 				/* Calcolo previsione del prossimo burst:
 					Viene applicato il filtro passa basso tra il tempo totale misurato per la terminazione
 					completa del CPU burst e il tempo previsto alla fine dello scorso CPU burst. */
-				double lpFilter = pcb->timer * args->decay + pcb->last_prediction * (1-args->decay);
+				double lpFilter = pcb->timer_CPU_burst * args->decay + pcb->last_prediction * (1-args->decay);
 				e->next_prediction = lpFilter;
 			}
 		}
@@ -129,10 +129,10 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 			poter essere riutilizzata in futuro per il calcolo delle previsioni.*/
 		pcb->last_prediction = e->next_prediction;
 
-		// Lo scheduler avvisa l'OS di resettare il pcb->timer
+		// Lo scheduler avvisa l'OS di resettare il pcb->timer_CPU_burst
 		pcb->resetTimer = 1;
 	}
-	
+
 	/* Caso di CPU burst interrotto dal quanto (o max_quantum):
 		Se un evento è in running da più tempo del valore del quanto (o max_quantum) viene interrotto 
 		dallo scheduler. Verrà creato un nuovo evento di tipo CPU burst avente come durata la durata rimanente
@@ -164,7 +164,7 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 
 		Questa operazione ha come scopo quello di minimizzare le interruzioni del CPU burst quando vi 
 			sono dei notevoli aumenti da un burst all'altro. */
-		double lpFilter = pcb->timer * args->decay + e->quantum * (1-args->decay);
+		double lpFilter = pcb->timer_CPU_burst * args->decay + e->quantum * (1-args->decay);
 		e->next_prediction = lpFilter;
 
 		// Inizializzazione del quanto per l'evento con il burst rimanente

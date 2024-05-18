@@ -72,7 +72,7 @@ void OS_createProcess(OS* os, Process* p) {
 	new_pcb->events = p->events;
 
 	// Timer PCB inizialmente a zero
-	new_pcb->timer = 0;
+	new_pcb->timer_CPU_burst = 0;
 
 	// Non resettare il timer
 	new_pcb->resetTimer = 0;
@@ -324,13 +324,13 @@ void OS_simStep(OS* os, int* timer){
 			e->timer ++;
 			printf("\t\t\trunning for: %d epochs\n", e->timer);
 
-			/* pcb->timer è un timer che si azzera solo quando un evento e tutti gli eventi 
+			/* pcb->timer_CPU_burst è un timer che si azzera solo quando un evento e tutti gli eventi 
 			derivati da esso concludono. */
-			pcb->timer ++;
-			printf("\t\t\tCPU burst for: %d epochs\n", pcb->timer);
+			pcb->timer_CPU_burst ++;
+			printf("\t\t\tCPU burst for: %d epochs\n", pcb->timer_CPU_burst);
 
 			#ifdef _DEBUG
-				printf("\npcb->timer: %d", pcb->timer);
+				printf("\npcb->timer_CPU_burst: %d", pcb->timer_CPU_burst);
 				printf("\ne->timer: %d", e->timer);
 				printf("\nduration: %d", e->duration);
 				printf("\nquantum: %.2f\tnextprediction: %.2f\n", e->quantum, e->next_prediction);
@@ -349,13 +349,14 @@ void OS_simStep(OS* os, int* timer){
 				// Aggiornamento numero di burst
 				os->n_CPU_bursts += e->timer;
 
-				// Invocazione scheduler
+				/* Invocazione funzione dello scheduler per gestire i casi in cui il CPU burst termina
+					o supera la durata del quanto. */
 				(*os->schedule_fn_split) (pcb, os->schedule_args);
 
 				printf("\t\t\tnextprediction: %.2f\n", e->next_prediction);
 
 				#ifdef _DEBUG
-					printf("\npcb->timer: %d", pcb->timer);
+					printf("\npcb->timer_CPU_burst: %d", pcb->timer_CPU_burst);
 					printf("\ne->timer: %d", e->timer);
 					printf("\nduration: %d", e->duration);
 					printf("\nquantum: %.2f\tnextprediction: %.2f\n", e->quantum, e->next_prediction);
@@ -366,10 +367,10 @@ void OS_simStep(OS* os, int* timer){
 					List_popFront(&pcb->events);
 				}
 
-				/* pcb->timer si azzera poiché tutti gli eventi derivati dall'evento iniziale sono conclusi. 
+				/* pcb->timer_CPU_burst si azzera poiché tutti gli eventi derivati dall'evento iniziale sono conclusi. 
 				Lo scheduler, assicuratosi di ciò, setta resetTimer = 1. */
 				if(pcb->resetTimer){
-					pcb->timer = 0;
+					pcb->timer_CPU_burst = 0;
 					pcb->resetTimer = 0;
 				}
 

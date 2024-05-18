@@ -8,7 +8,7 @@ typedef struct {
 	int pid;
 	ListHead events;
 
-	int timer;
+	int timer_CPU_burst;
 	char resetTimer;
 
 	double last_prediction;
