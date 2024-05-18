@@ -26,7 +26,7 @@ Nell'algoritmo che andremo ad implementare, applicheremo all'idea dello Shortest
 	di un periodo di tempo chiamato cpu quantum.
 Per integrare il concetto di preemption con lo SJB, andremo a predire il prossimo CPU burst attraverso il
 	filtro passa basso, e considereremo questo valore come il quanto di tempo dopo il quale verrà tolta la
-	cpu al processo corrente.
+	cpu al prossimo processo.
 Nel caso base, cioè quando un processo arriva, useremo la durata reale dell'evento come quantum prediction.
 */
 
@@ -157,8 +157,8 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 		/* #################################### */
 		
 		/* Calcolo previsione del prossimo burst:
-			Viene applicato il filtro passa basso tra il tempo totale misurato per la terminazione
-			completa del CPU burst e il quanto di tempo corrente.
+			Viene applicato il filtro passa basso tra il tempo che l'intero evento CPU sta impiegando
+			per concludere e il quanto di tempo corrente.
 			Se quest'ultimo equivale a -1, caso del primo CPU burst di un processo, abbiamo provveduto
 			a settarlo ad un valore pari a e->timer.
 
