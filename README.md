@@ -15,13 +15,13 @@ per *`α=1`* il tempo stimato del prossimo burst è pari al tempo misurato; per 
 
 Nell'algoritmo implementato, si applica all'idea dello Shortest Job First il concetto di **`preemption`**: lo scheduler può togliere forzatamente la CPU ad un processo se questo la sta usando da più di un periodo di tempo chiamato **quanto** (***`cpu quantum`***). Tuttavia il kernel imposta a tempo di compilazione un **valore massimo** per il quanto, indicato con ***`max_quantum`***.
 
-Per integrare il concetto di preemption con lo SJB, andremo a predire il prossimo CPU burst attraverso il filtro passa basso e considereremo questo valore come il quanto di tempo dopo il quale verrà tolta la cpu al prossimo processo.
+Per integrare il concetto di preemption con lo SJB, andremo a predire il prossimo CPU burst attraverso il filtro passa basso e considereremo questo valore come il quanto di tempo dopo il quale verrà tolta la CPU al prossimo processo.
 
 NB: il valore dei quanti di tempo calcolati rimangono tali anche se superiori a *max_quantum*, al fine di svolgere correttamente il calcolo dei successivi quanti.
 
 Nel caso di un processo appena creato, poiché il suo primo CPU burst non ha una predizione fatta nel passato e quindi non ha ancora un quanto (*quantum=-1*), useremo come quanto di tempo la durata dell'intero evento CPU o il *`max_quantum`*, se questo è minore della durata dell'evento.
 
-Nel caso in cui un evento di tipo CPU venga interrotto una o più volte perchè in running da un tempo maggoire o uguale al quanto (o *max_quantum*), al momento dell'interruzione (*end quantum*) l'evento verrà sostituito con un nuovo evento CPU con durata pari alla durata rimanente e quanto pari a
+Nel caso in cui un evento di tipo CPU venga interrotto una o più volte, perchè in running da un tempo maggiore o uguale al quanto (o *max_quantum*), al momento dell'interruzione (*end quantum*) l'evento verrà sostituito con un nuovo evento CPU con durata pari alla durata rimanente e quanto pari a
 ```
 lpFilter = pcb->timer_CPU_burst * args->decay + e->quantum * (1-args->decay)
 ```
