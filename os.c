@@ -32,7 +32,8 @@ void OS_init(OS* os) {
 	os->schedule_fn = 0;
 
 	// Numero totale di bursts
-	os->n_bursts = 0;
+	os->n_CPU_bursts = 0;
+	os->n_IO_bursts = 0;
 }
 
 void OS_createProcess(OS* os, Process* p) {
@@ -90,14 +91,6 @@ void OS_createProcess(OS* os, Process* p) {
 
 	// Turnaround time del processo inizialmente nullo
 	new_pcb->turnaroundTime = 0;
-
-	// Aggiornamento campo n_burst
-	aux = new_pcb->events.first;
-	while(aux){
-		ProcessEvent* e = (ProcessEvent*) aux;
-		os->n_bursts += e->duration;
-		aux = aux->next;
-	}
 
 	// Controlliamo che il processo p abbia eventi
 	assert( new_pcb->events.first && "Error on creation: process without events");
@@ -241,6 +234,10 @@ void OS_simStep(OS* os, int* timer){
 			// Se l'IO BURST non è terminato, si passa al prossimo processo
 			// Se l'IO BURST è terminato,
 			if (e->timer == e->duration) {
+				
+				// Aggiornamento numero di burst
+				os->n_IO_bursts += e->timer;
+
 				printf("\t\t\tend IO BURST for process (%d)\n", pcb->pid);
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
@@ -349,6 +346,9 @@ void OS_simStep(OS* os, int* timer){
 			// Se il CPU BURST è terminato o interrotto dal quanto,
 			if (e->timer == round(e->quantum) || e->timer == args->max_quantum || e->timer == e->duration) {
 				
+				// Aggiornamento numero di burst
+				os->n_CPU_bursts += e->timer;
+
 				// Invocazione scheduler
 				(*os->schedule_fn_split) (pcb, os->schedule_args);
 

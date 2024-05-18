@@ -287,7 +287,8 @@ int main(int argc, char** argv) {
 			// Total time
 			printEscape_2("1;48;5;234", e); printf("Number of CPUs:\t\t\t\t\t\t%d", core); printEscape_2("0", e); printf("\n");
 			printEscape_2("1;48;5;234", e); printf("Number of processes:\t\t\t\t\t%d", os.all_processes.size); printEscape_2("0", e); printf("\n");
-			printEscape_2("1;48;5;234", e); printf("Number of CPU and IO bursts:\t\t\t\t%d", os.n_bursts); printEscape_2("0", e); printf("\n");
+			printEscape_2("1;48;5;234", e); printf("Number of CPU bursts:\t\t\t\t\t%d", os.n_CPU_bursts); printEscape_2("0", e); printf("\n");
+			printEscape_2("1;48;5;234", e); printf("Number of IO bursts:\t\t\t\t\t%d", os.n_IO_bursts); printEscape_2("0", e); printf("\n");
 			printEscape_2("1;48;5;234", e); printf("Total time:\t\t\t\t\t\t%d", timer); printEscape_2("0", e); printf("\n");
 			printf("----------------------------------------------------------------\n");
 
