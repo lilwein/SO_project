@@ -88,7 +88,7 @@ void SJF_calculatePrediction(PCB* pcb, void* args_) {
 	/* Caso di CPU burst finito:
 		Quando un evento di tipo CPU burst termina, viene calcolata la predizione per il prossimo CPU burst e 
 		la si pone come valore del quanto per il prossimo CPU burst. */
-	if(e->timer == e->duration) {
+	if(burst_is_ended(e)) {
 
 		// Caso del primo CPU burst di un processo
 		if(e->quantum==-1) {

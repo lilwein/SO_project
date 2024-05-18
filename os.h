@@ -56,3 +56,5 @@ double turnaroundTime_OS(OS* os);
 void turnaroundTime_inc(OS* os);
 
 void setZeroUsed(ListHead* head);
+
+char burst_is_ended(ProcessEvent* e);

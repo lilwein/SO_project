@@ -233,7 +233,7 @@ void OS_simStep(OS* os, int* timer){
 			
 			// Se l'IO BURST non è terminato, si passa al prossimo processo
 			// Se l'IO BURST è terminato,
-			if (e->timer == e->duration) {
+			if (burst_is_ended(e)) {
 				
 				// Aggiornamento numero di burst
 				os->n_IO_bursts += e->timer;
@@ -344,7 +344,7 @@ void OS_simStep(OS* os, int* timer){
 
 			// Se il CPU BURST non è terminato, si passa al prossimo processo
 			// Se il CPU BURST è terminato o interrotto dal quanto,
-			if (e->timer == round(e->quantum) || e->timer == args->max_quantum || e->timer == e->duration) {
+			if (e->timer == round(e->quantum) || e->timer == args->max_quantum || burst_is_ended(e)) {
 				
 				// Aggiornamento numero di burst
 				os->n_CPU_bursts += e->timer;
@@ -363,7 +363,7 @@ void OS_simStep(OS* os, int* timer){
 				#endif
 
 				// Eliminazione dell'evento dalla coda degli eventi del pcb
-				if(e->timer == e->duration) {
+				if(burst_is_ended(e)) {
 					List_popFront(&pcb->events);
 				}
 
@@ -538,3 +538,8 @@ void setZeroUsed(ListHead* head){
 		item = item->next;
 	}
 };
+
+// burst_is_ended() restituisce 1 se il burst è terminato, 0 altrimenti
+char burst_is_ended(ProcessEvent* e){
+	return e->timer == e->duration;
+}

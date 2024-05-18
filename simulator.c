@@ -396,8 +396,8 @@ void enterInLine(){
 			int cpu_burst = gets_int(1, 9999, 17);
 			int io_burst = gets_int(1, 9999, 18);
 			
-			// Aggiunta dei due eventi al processo: new_event punta al primo evento (CPU)
-			ProcessEvent* new_event = Process_load_inline(existing_process, cpu_burst, io_burst);
+			// Aggiunta dei due eventi al processo
+			Process_load_inline(existing_process, cpu_burst, io_burst);
 
 			printf("Loading new event with CPU_BURST: %d, IO_BURST: %d\n", cpu_burst, io_burst);
 			printf("Process with pid (%d) has now %d events\n", existing_process->pid, existing_process->events.size);
